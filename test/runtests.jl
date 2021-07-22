@@ -2,5 +2,5 @@ using GeometricBase
 using Test
 
 @testset "GeometricBase.jl" begin
-    # Write your tests here.
+    include("test_utils.jl")
 end
