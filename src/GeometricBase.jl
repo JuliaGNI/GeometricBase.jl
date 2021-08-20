@@ -4,15 +4,17 @@ module GeometricBase
     include("Utils.jl")
 
 
+    include("types.jl")
+
     export NullInvariants, NullParameters
 
     export OptionalAbstractArray, OptionalArray,
            OptionalFunction, OptionalNamedTuple,
            OptionalInvariants, OptionalParameters
     
-    export State, StateVector
+    export AbstractData
 
-    include("types.jl")
+    export State, StateVector, SolutionVector
 
 
     export evaluate, evaluate!
