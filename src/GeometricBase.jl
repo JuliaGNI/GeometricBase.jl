@@ -47,21 +47,21 @@ module GeometricBase
     export State, StateVector, SolutionVector
 
 
-    include("solutions/solution.jl")
-
-    export Solution
-    export counter, offset, lastentry
-
     include("solutions/dataseries.jl")
 
     export get_data!, set_data!
-    export AbstractDataSeries,
+    export AbstractDataSeries, DataSeries,
            DataSeriesConstructor
 
     include("solutions/timeseries.jl")
 
     export TimeSeries, compute_timeseries!
     
+
+    include("solutions/solution.jl")
+
+    export Solution
+    export counter, offset, lastentry
 
 
 end
