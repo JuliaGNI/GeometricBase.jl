@@ -1,6 +1,4 @@
-using GeometricBase
-using Test
+using SafeTestsets
 
-@testset "GeometricBase.jl" begin
-    include("test_utils.jl")
-end
+@safetestset "Utils                                                                           " begin include("test_utils.jl") end
+@safetestset "Time Series                                                                     " begin include("timeseries_tests.jl") end

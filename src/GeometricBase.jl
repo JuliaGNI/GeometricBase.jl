@@ -1,8 +1,38 @@
 module GeometricBase
 
+    using Base: TwicePrecision
+
+    using Test
+
     include("Config.jl")
     include("Utils.jl")
 
+
+    export evaluate, evaluate!
+
+    function evaluate end
+    function evaluate! end
+
+    export reset!, cut_periodic_solution!
+
+    function reset! end
+    function cut_periodic_solution! end
+
+    export ntime, nsave, nsamples, nconstraints
+    export eachsample, eachtimestep, timesteps
+    export periodicity
+
+    function ntime end
+    function nsave end
+    function nsamples end
+    function nconstraints end
+
+    function eachsample end
+    function eachtimestep end
+    function timesteps end
+
+    function periodicity end
+    
 
     include("types.jl")
 
@@ -17,28 +47,21 @@ module GeometricBase
     export State, StateVector, SolutionVector
 
 
-    export evaluate, evaluate!
+    include("solutions/solution.jl")
 
-    function evaluate end
-    function evaluate! end
+    export Solution
+    export counter, offset, lastentry
 
-    export write_to_hdf5
+    include("solutions/dataseries.jl")
 
-    function write_to_hdf5 end
+    export get_data!, set_data!
+    export AbstractDataSeries,
+           DataSeriesConstructor
 
-    export periodicity, reset!, cut_periodic_solution!
+    include("solutions/timeseries.jl")
 
-    function periodicity end
-    function reset! end
-    function cut_periodic_solution! end
+    export TimeSeries, compute_timeseries!
+    
 
-    export ntime, nsamples, nconstraints,
-           eachtimestep, eachsample
-
-    function nsamples end
-    function nconstraints end
-    function ntime end
-    function eachsample end
-    function eachtimestep end
 
 end

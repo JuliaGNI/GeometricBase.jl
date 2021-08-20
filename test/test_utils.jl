@@ -1,6 +1,7 @@
 using Base: TwicePrecision
 using GeometricBase.Utils
 using GeometricBase.Utils: _big
+using Test
 
 @testset "$(rpad("Macros",80))" begin
     
