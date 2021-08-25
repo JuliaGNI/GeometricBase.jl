@@ -1,11 +1,15 @@
 
 struct NullInvariants end
-Base.getindex(::NullInvariants,i...) = error("Invariants were indexed but the invariants are `nothing`. You likely forgot to pass invariants to the Equation!")
+Base.getindex(::NullInvariants, i...) = error("Invariants were indexed but the invariants are `nothing`. You likely forgot to pass invariants to the Equation!")
 Base.iterate(::NullInvariants) = error("Invariants were indexed but the invariants are `nothing`. You likely forgot to pass invariants to the Equation!")
 
 struct NullParameters end
-Base.getindex(::NullParameters,i...) = error("Parameters were indexed but the parameters are `nothing`. You likely forgot to pass parameters to the Equation!")
+Base.getindex(::NullParameters, i...) = error("Parameters were indexed but the parameters are `nothing`. You likely forgot to pass parameters to the Equation!")
 Base.iterate(::NullParameters) = error("Parameters were indexed but the parameters are `nothing`. You likely forgot to pass parameters to the Equation!")
+
+struct NullPeriodicity end
+Base.getindex(::NullPeriodicity, i...) = error("Periodicity was indexed but the periodicity is `nothing`. You likely forgot to pass periodicity to the Equation!")
+Base.iterate(::NullPeriodicity) = error("Periodicity was indexed but the periodicity is `nothing`. You likely forgot to pass periodicity to the Equation!")
 
 
 const OptionalArray{arrayType} = Union{Nothing, arrayType} where {arrayType <: AbstractArray}

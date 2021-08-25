@@ -37,7 +37,7 @@ module GeometricBase
 
     include("types.jl")
 
-    export NullInvariants, NullParameters
+    export NullInvariants, NullParameters, NullPeriodicity
 
     export OptionalAbstractArray, OptionalArray,
            OptionalFunction, OptionalNamedTuple,
