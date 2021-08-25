@@ -19,6 +19,7 @@ const OptionalFunction      = Union{Nothing, Function}
 const OptionalNamedTuple    = Union{NamedTuple, Nothing}
 const OptionalInvariants    = Union{NamedTuple, NullInvariants}
 const OptionalParameters    = Union{NamedTuple, NullParameters}
+const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 

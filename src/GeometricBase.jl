@@ -41,7 +41,8 @@ module GeometricBase
 
     export OptionalAbstractArray, OptionalArray,
            OptionalFunction, OptionalNamedTuple,
-           OptionalInvariants, OptionalParameters
+           OptionalInvariants, OptionalParameters,
+           OptionalPeriodicity
     
     export AbstractData
 

@@ -31,22 +31,28 @@ end
     @test Matrix <: OptionalArray{Matrix}
 
 
-    @test Nothing        <: OptionalAbstractArray
-    @test Matrix         <: OptionalAbstractArray
-    @test Matrix{Int}    <: OptionalAbstractArray
-    @test AbstractMatrix <: OptionalAbstractArray
+    @test Nothing         <: OptionalAbstractArray
+    @test Matrix          <: OptionalAbstractArray
+    @test Matrix{Int}     <: OptionalAbstractArray
+    @test AbstractMatrix  <: OptionalAbstractArray
 
-    @test Nothing        <: OptionalFunction
-    @test Function       <: OptionalFunction
+    @test Nothing         <: OptionalFunction
+    @test Function        <: OptionalFunction
 
-    @test Nothing        <: OptionalNamedTuple
-    @test NamedTuple     <: OptionalNamedTuple
+    @test Nothing         <: OptionalNamedTuple
+    @test NamedTuple      <: OptionalNamedTuple
 
-    @test NullInvariants <: OptionalInvariants
-    @test NamedTuple     <: OptionalInvariants
+    @test NullInvariants  <: OptionalInvariants
+    @test NamedTuple      <: OptionalInvariants
 
-    @test NullParameters <: OptionalParameters
-    @test NamedTuple     <: OptionalParameters
+    @test NullParameters  <: OptionalParameters
+    @test NamedTuple      <: OptionalParameters
+
+    @test NullPeriodicity <: OptionalPeriodicity
+    @test AbstractArray   <: OptionalPeriodicity
+    @test Array           <: OptionalPeriodicity
+    @test Matrix          <: OptionalPeriodicity
+    @test Matrix{Int}     <: OptionalPeriodicity
 
 end
 
