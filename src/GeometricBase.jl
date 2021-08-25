@@ -20,7 +20,7 @@ module GeometricBase
 
     export ntime, nsave, nsamples, nconstraints
     export eachsample, eachtimestep, timesteps
-    export periodicity
+    export parameters, periodicity
 
     function ntime end
     function nsave end
@@ -31,6 +31,7 @@ module GeometricBase
     function eachtimestep end
     function timesteps end
 
+    function parameters end
     function periodicity end
     
 
@@ -53,6 +54,7 @@ module GeometricBase
     export AbstractDataSeries, DataSeries,
            DataSeriesConstructor
 
+
     include("solutions/timeseries.jl")
 
     export TimeSeries, compute_timeseries!
@@ -62,6 +64,5 @@ module GeometricBase
 
     export Solution
     export counter, offset, lastentry
-
 
 end
