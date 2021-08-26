@@ -19,18 +19,21 @@ module GeometricBase
     function cut_periodic_solution! end
 
     export ntime, nsave, nsamples, nconstraints
-    export eachsample, eachtimestep, timesteps
-    export parameters, periodicity
 
     function ntime end
     function nsave end
     function nsamples end
     function nconstraints end
 
+    export eachsample, eachtimestep, timesteps
+    
     function eachsample end
     function eachtimestep end
     function timesteps end
 
+    export invariants, parameters, periodicity
+
+    function invariants end
     function parameters end
     function periodicity end
     
