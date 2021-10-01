@@ -1,4 +1,4 @@
-using Base: TwicePrecision
+using Base: Callable, TwicePrecision
 using GeometricBase
 using Test
 
@@ -36,11 +36,17 @@ end
     @test Matrix{Int}     <: OptionalAbstractArray
     @test AbstractMatrix  <: OptionalAbstractArray
 
+    @test Nothing         <: OptionalCallable
+    @test Callable        <: OptionalCallable
+
     @test Nothing         <: OptionalFunction
     @test Function        <: OptionalFunction
 
     @test Nothing         <: OptionalNamedTuple
     @test NamedTuple      <: OptionalNamedTuple
+
+    @test Nothing         <: OptionalTuple
+    @test Tuple           <: OptionalTuple
 
     @test NullInvariants  <: OptionalInvariants
     @test NamedTuple      <: OptionalInvariants
