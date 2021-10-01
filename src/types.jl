@@ -15,6 +15,7 @@ Base.iterate(::NullPeriodicity) = error("Periodicity was indexed but the periodi
 const OptionalArray{arrayType} = Union{Nothing, arrayType} where {arrayType <: AbstractArray}
 
 const OptionalAbstractArray = Union{Nothing, AbstractArray}
+const OptionalCallable      = Union{Nothing, Callable}
 const OptionalFunction      = Union{Nothing, Function}
 const OptionalNamedTuple    = Union{NamedTuple, Nothing}
 const OptionalInvariants    = Union{NamedTuple, NullInvariants}
