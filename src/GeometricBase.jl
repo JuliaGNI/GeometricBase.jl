@@ -1,6 +1,6 @@
 module GeometricBase
 
-    using Base: TwicePrecision
+    using Base: Callable, TwicePrecision
 
     using Test
 
