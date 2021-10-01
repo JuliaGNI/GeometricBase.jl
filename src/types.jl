@@ -17,7 +17,9 @@ const OptionalArray{arrayType} = Union{Nothing, arrayType} where {arrayType <: A
 const OptionalAbstractArray = Union{Nothing, AbstractArray}
 const OptionalCallable      = Union{Nothing, Callable}
 const OptionalFunction      = Union{Nothing, Function}
-const OptionalNamedTuple    = Union{NamedTuple, Nothing}
+const OptionalNamedTuple    = Union{Nothing, NamedTuple}
+const OptionalTuple         = Union{Nothing, Tuple}
+
 const OptionalInvariants    = Union{NamedTuple, NullInvariants}
 const OptionalParameters    = Union{NamedTuple, NullParameters}
 const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}

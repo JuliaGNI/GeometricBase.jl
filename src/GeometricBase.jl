@@ -44,8 +44,11 @@ module GeometricBase
 
     export OptionalAbstractArray, OptionalArray,
            OptionalCallable, OptionalFunction,
-           OptionalNamedTuple, OptionalInvariants,
-           OptionalParameters, OptionalPeriodicity
+           OptionalNamedTuple, OptionalTuple
+
+    export OptionalInvariants,
+           OptionalParameters,
+           OptionalPeriodicity
     
     export AbstractData
 
