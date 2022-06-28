@@ -12,7 +12,7 @@ using Test
     @test_throws ErrorException nsamples(test_sol)
 
     @test_throws ErrorException counter(test_sol)
-    @test_throws ErrorException offset(test_sol)
+    # @test_throws ErrorException offset(test_sol)
     @test_throws ErrorException lastentry(test_sol)
     @test_throws ErrorException timesteps(test_sol)
 
