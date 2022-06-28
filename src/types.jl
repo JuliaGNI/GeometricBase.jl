@@ -27,9 +27,17 @@ const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 
 const State{DT <: Number} = AbstractArray{DT}
+
+"""
+    The `vectorfield` function returns a datastructure that stores the vectorfield for an abstract
+    array `S` that holds the state of a system. By default it returns `zero(S)`, but custom methods
+    can be implemented in order to account for more specific use cases, e.g., when `S` also contains
+    constant fields that should not be present in the vector field.
+"""
+vectorfield(S::State) = zero(S)
+
 const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:State{DT}}}
 
 Base.zero(X::ST) where {DT, VT, ST <: StateVector{DT,VT}} = VT[zero(x) for x in X]
-
 
 SolutionVector{DT} = Union{Vector{DT}, Vector{TwicePrecision{DT}}}

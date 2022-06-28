@@ -90,4 +90,11 @@ end
     @test Vector{TwicePrecision{Int}} <: SolutionVector
     @test Vector{TwicePrecision{Int}} <: SolutionVector{TwicePrecision{Int}}
 
+    @test vectorfield(rand(3)) == zeros(3)
+    @test vectorfield(rand(3,3)) == zeros(3,3)
+
+    GeometricBase.vectorfield(S::Vector) = zeros(3)
+
+    @test vectorfield(rand(4)) == zeros(3)
+
 end

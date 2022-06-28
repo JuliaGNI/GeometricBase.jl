@@ -54,6 +54,8 @@ module GeometricBase
 
     export State, StateVector, SolutionVector
 
+    export vectorfield
+
 
     include("solutions/dataseries.jl")
 
