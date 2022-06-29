@@ -25,18 +25,26 @@ module GeometricBase
     function nsamples end
     function nconstraints end
 
-    export eachsample, eachtimestep, timesteps
+    export eachsample, eachtimestep, timestep, timesteps
     
     function eachsample end
     function eachtimestep end
+    function timestep end
     function timesteps end
 
-    export invariants, parameters, periodicity
+    export functions, solutions, invariants, parameters, periodicity
 
+    function functions end
+    function solutions end
     function invariants end
     function parameters end
     function periodicity end
+
+    export equation, equations
     
+    function equation end
+    function equations end
+
 
     include("types.jl")
 
