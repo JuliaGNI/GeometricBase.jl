@@ -2,8 +2,6 @@ module GeometricBase
 
     using Base: Callable, TwicePrecision
 
-    using Test
-
     include("Config.jl")
     include("Utils.jl")
 
@@ -63,23 +61,5 @@ module GeometricBase
     export State, StateVector, SolutionVector
 
     export vectorfield
-
-
-    include("solutions/dataseries.jl")
-
-    export get_data!, set_data!
-    export AbstractDataSeries, DataSeries,
-           DataSeriesConstructor
-
-
-    include("solutions/timeseries.jl")
-
-    export TimeSeries, compute_timeseries!
-    
-
-    include("solutions/solution.jl")
-
-    export Solution
-    export counter, offset, lastentry
 
 end
