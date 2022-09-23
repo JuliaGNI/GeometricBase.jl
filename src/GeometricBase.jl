@@ -6,6 +6,13 @@ module GeometricBase
     include("Utils.jl")
 
 
+    export datatype, timetype, arrtype, equtype
+
+    function datatype end
+    function timetype end
+    function arrtype end
+    function equtype end
+
     export evaluate, evaluate!
 
     function evaluate end
