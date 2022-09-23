@@ -23,6 +23,14 @@ module GeometricBase
     function nsamples end
     function nconstraints end
 
+    export tspan, tstep, tbegin, tend
+
+    function tspan end
+    function tstep end
+
+    tbegin(x) = tspan(x)[begin]
+    tend(x) = tspan(x)[end]
+
     export eachsample, eachtimestep, timestep, timesteps
     
     function eachsample end
