@@ -29,10 +29,10 @@ const AbstractData = Union{Number, AbstractArray{<:Number}}
 const State{DT <: Number} = AbstractArray{DT}
 
 """
-    The `vectorfield` function returns a datastructure that stores the vectorfield for an abstract
-    array `S` that holds the state of a system. By default it returns `zero(S)`, but custom methods
-    can be implemented in order to account for more specific use cases, e.g., when `S` also contains
-    constant fields that should not be present in the vector field.
+The `vectorfield` function returns a datastructure that stores the vectorfield for an abstract
+array `S` that holds the state of a system. By default it returns `zero(S)`, but custom methods
+can be implemented in order to account for more specific use cases, e.g., when `S` also contains
+constant fields that should not be present in the vector field.
 """
 vectorfield(S::State) = zero(S)
 
