@@ -66,8 +66,9 @@ module GeometricBase
     export name, description, reference
 
     function name end
-    function description end
-    function reference end
+    
+    description(::Any) = missing
+    reference(::Any) = missing
 
 
     include("types.jl")
