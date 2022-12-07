@@ -58,6 +58,17 @@ module GeometricBase
     function equation end
     function equations end
 
+    export order, tableau
+
+    function order end
+    function tableau end
+
+    export name, description, reference
+
+    function name end
+    function description end
+    function reference end
+
 
     include("types.jl")
 
