@@ -55,8 +55,6 @@ function tableau end
 
 export name, description, reference
 
-function name end
-
+name(::Any) = missing
 description(::Any) = missing
 reference(::Any) = missing
-
