@@ -11,10 +11,9 @@ export evaluate, evaluate!
 function evaluate end
 function evaluate! end
 
-export reset!, cut_periodic_solution!
+export reset!
 
 function reset! end
-function cut_periodic_solution! end
 
 export ntime, nsave, nsamples, nconstraints
 
