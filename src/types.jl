@@ -16,7 +16,7 @@ export AbstractData
 
 export State, StateVector, SolutionVector
 
-export vectorfield
+export vectorfield, zerovector
 
 
 """
@@ -67,6 +67,6 @@ vectorfield(S::State) = zero(S)
 
 const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:State{DT}}}
 
-Base.zero(X::ST) where {DT, VT, ST <: StateVector{DT,VT}} = VT[zero(x) for x in X]
+zerovector(X::ST) where {DT, VT, ST <: StateVector{DT,VT}} = VT[zero(x) for x in X]
 
 SolutionVector{DT} = Union{Vector{DT}, Vector{TwicePrecision{DT}}}
