@@ -47,9 +47,10 @@ function invariants end
 function parameters end
 function periodicity end
 
-export order, tableau
+export order, coefficients, tableau
 
 function order end
+function coefficients end
 function tableau end
 
 export name, description, reference
