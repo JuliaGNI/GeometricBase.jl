@@ -5,8 +5,6 @@ using Test
 
 @testset "$(rpad("Null Types",80))" begin
     
-    using GeometricBase: NullInvariants, NullParameters, NullPeriodicity
-
     invs = NullInvariants()
     @test_throws ErrorException invs[1]
     @test_throws ErrorException for i in invs end
@@ -24,16 +22,6 @@ end
 
 @testset "$(rpad("Optional Types",80))" begin
 
-    using GeometricBase: OptionalArray,
-                         OptionalAbstractArray,
-                         OptionalCallable,
-                         OptionalFunction,
-                         OptionalNamedTuple,
-                         OptionalTuple,
-                         OptionalInvariants,
-                         OptionalParameters,
-                         OptionalPeriodicity
-    
     @test Nothing <: OptionalArray
     @test Nothing <: OptionalArray{AbstractArray}
     @test Nothing <: OptionalArray{Matrix}
@@ -76,8 +64,6 @@ end
 
 
 @testset "$(rpad("Data Types",80))" begin
-    
-    using GeometricBase: AbstractData, State, StateVector, SolutionVector, vectorfield
     
     @test Number <: AbstractData
     @test Int    <: AbstractData
