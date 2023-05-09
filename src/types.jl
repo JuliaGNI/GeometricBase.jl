@@ -38,18 +38,28 @@ const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 
-const State{DT <: Number} = AbstractArray{DT}
+"""
+`State{T}` is a shortcut for `AbstractArray{T}` that can be extended in the future should the need arise.
+"""
+const State{T <: Number} = AbstractArray{T}
 
 """
 The `vectorfield` function returns a datastructure that stores the vectorfield for an abstract
-array `S` that holds the state of a system. By default it returns `zero(S)`, but custom methods
-can be implemented in order to account for more specific use cases, e.g., when `S` also contains
+array `s` that holds the state of a system. By default it returns `zero(s)`, but custom methods
+can be implemented in order to account for more specific use cases, e.g., when `s` also contains
 constant fields that should not be present in the vector field.
 """
-vectorfield(S::State) = zero(S)
+vectorfield(s::State) = zero(s)
 
+"""
+`StateVector{DT,VT}` is a vector of [`State`](@ref)s, where `DT` is the datatype of the state and `VT` is the 
+type of the vector.
+"""
 const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:State{DT}}}
 
+"""
+`zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with [`zero`](@ref) applied all elements of `X`.
+"""
 zerovector(X::ST) where {DT, VT, ST <: StateVector{DT,VT}} = VT[zero(x) for x in X]
 
 SolutionVector{DT} = Union{Vector{DT}, Vector{TwicePrecision{DT}}}
