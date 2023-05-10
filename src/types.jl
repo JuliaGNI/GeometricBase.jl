@@ -77,6 +77,6 @@ const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:State{DT}}}
 """
 `zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with [`zero`](@ref) applied all elements of `X`.
 """
-zerovector(X::ST) where {DT, VT, ST <: StateVector{DT,VT}} = VT[zero(x) for x in X]
+zerovector(X::ST) where {VT, ST <: StateVector{<: Number, VT}} = VT[zero(x) for x in X]
 
-SolutionVector{DT} = Union{Vector{DT}, Vector{TwicePrecision{DT}}}
+const SolutionVector{DT} = Union{Vector{DT}, Vector{TwicePrecision{DT}}}
