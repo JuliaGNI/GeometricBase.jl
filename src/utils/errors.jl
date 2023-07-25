@@ -4,5 +4,5 @@ function relative_norm_error(sol, ref, p=2)
 end
 
 function relative_maximum_error(sol, ref)
-    maximum(abs.((sol .- ref) ./ ref))
+    maximum(abs.(sol .- ref)) ./ maximum(abs.(ref))
 end
