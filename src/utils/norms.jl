@@ -1,10 +1,6 @@
 
 function L2norm(x)
-    local l2::eltype(x) = 0
-    for xᵢ in x
-        l2 += xᵢ^2
-    end
-    l2
+    mapreduce(xᵢ -> xᵢ * xᵢ, +, x)
 end
 
 function l2norm(x)
