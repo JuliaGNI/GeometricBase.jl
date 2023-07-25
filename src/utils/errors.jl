@@ -1,8 +1,8 @@
 
-function relative_l2_error(sol, ref)
-    norm(sol.d[end,begin] .- ref) / norm(ref)
+function relative_norm_error(sol, ref, p=2)
+    norm(sol .- ref, p) / norm(ref, p)
 end
 
 function relative_maximum_error(sol, ref)
-    maximum(abs.((sol.d[end,begin] .- ref) ./ ref))
+    maximum(abs.((sol .- ref) ./ ref))
 end
