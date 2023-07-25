@@ -12,8 +12,4 @@ module Utils
 
     include("utils/norms.jl")
 
-    export relative_norm_error, relative_maximum_error
-
-    include("utils/errors.jl")
-
 end
