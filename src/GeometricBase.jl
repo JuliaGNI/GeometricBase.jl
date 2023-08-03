@@ -6,7 +6,7 @@ module GeometricBase
     include("methods.jl")
     include("types.jl")
 
-    include("geometric_integrator.jl")
-    include("geometric_method.jl")
+    include("abstract_integrator.jl")
+    include("abstract_method.jl")
 
 end

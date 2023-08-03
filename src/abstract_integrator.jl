@@ -1,13 +1,9 @@
 
-export GeometricIntegrator, isGeometricIntegrator
-export DeterministicIntegrator, StochasticIntegrator
+export AbstractIntegrator, isAbstractIntegrator
 export integrate, integrate!
 
 
-abstract type GeometricIntegrator end
-
-abstract type DeterministicIntegrator <: GeometricIntegrator end
-abstract type StochasticIntegrator <: GeometricIntegrator end
+abstract type AbstractIntegrator end
 
 
 """
@@ -40,7 +36,7 @@ integrate!(integrator)
 function integrate! end
 
 
-function isGeometricIntegrator(int::GeometricIntegrator)
+function isAbstractIntegrator(int::AbstractIntegrator)
     applicable(integrate!, int) || return false
     # applicable(integrate, problem, method) || return false
     return true

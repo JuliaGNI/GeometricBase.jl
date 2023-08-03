@@ -2,11 +2,11 @@ using GeometricBase
 using Test
 
 
-struct MyMethod <: GeometricMethod end
+struct MyMethod <: AbstractMethod end
 
 method = MyMethod()
 
-@test !isGeometricMethod(method)
+@test !isAbstractMethod(method)
 
 GeometricBase.isexplicit(method::MyMethod) = true
 GeometricBase.isimplicit(method::MyMethod) = false
@@ -20,4 +20,4 @@ GeometricBase.name(::Union{MyMethod, Type{<:MyMethod}}) = "My Method"
 GeometricBase.description(::Union{MyMethod, Type{<:MyMethod}}) = "Test Method"
 GeometricBase.reference(::Union{MyMethod, Type{<:MyMethod}}) = "n/a"
 
-@test isGeometricMethod(method)
+@test isAbstractMethod(method)
