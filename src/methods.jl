@@ -40,6 +40,6 @@ function order end
 function coefficients end
 function tableau end
 
-name(::Any) = missing
-description(::Any) = missing
-reference(::Any) = missing
+function name end
+function description end
+function reference end
