@@ -19,5 +19,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/JuliaGNI/GeometricBase.jl",
+    repo   = "github.com/JuliaGNI/GeometricBase.jl",
+    devurl = "latest",
+    devbranch = "main",
 )
