@@ -72,13 +72,13 @@ end
     @test AbstractMatrix{Number} <: AbstractData
     @test AbstractMatrix{Int}    <: AbstractData
 
-    @test Matrix{Number} <: State
-    @test Matrix{Int}    <: State
-    @test Matrix{Number} <: State{Number}
-    @test Matrix{Int}    <: State{<:Number}
-    @test Matrix{Int}    <: State{Int}
-    @test AbstractMatrix{Number} <: State
-    @test AbstractMatrix{Int}    <: State
+    @test Matrix{Number} <: StateVariable
+    @test Matrix{Int}    <: StateVariable
+    @test Matrix{Number} <: StateVariable{Number}
+    @test Matrix{Int}    <: StateVariable{<:Number}
+    @test Matrix{Int}    <: StateVariable{Int}
+    @test AbstractMatrix{Number} <: StateVariable
+    @test AbstractMatrix{Int}    <: StateVariable
 
     @test Vector{Matrix{Int}} <: StateVector
     @test Vector{Matrix{Number}} <: StateVector

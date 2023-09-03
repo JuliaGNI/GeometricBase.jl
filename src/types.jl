@@ -14,7 +14,7 @@ export OptionalInvariants,
 
 export AbstractData
 
-export State, StateVector, SolutionVector
+export StateVariable, StateVector, SolutionVector
 
 export vectorfield, zerovector
 
@@ -56,9 +56,9 @@ const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 
 """
-`State{T}` is a shortcut for `AbstractArray{T}` that can be extended in the future should the need arise.
+`StateVariable{T}` is a shortcut for `AbstractArray{T}` that can be extended in the future should the need arise.
 """
-const State{T <: Number} = AbstractArray{T}
+const StateVariable{T <: Number} = AbstractArray{T}
 
 """
 The `vectorfield` function returns a datastructure that stores the vectorfield for an abstract
@@ -66,13 +66,13 @@ array `s` that holds the state of a system. By default it returns `zero(s)`, but
 can be implemented in order to account for more specific use cases, e.g., when `s` also contains
 constant fields that should not be present in the vector field.
 """
-vectorfield(s::State) = zero(s)
+vectorfield(s::StateVariable) = zero(s)
 
 """
-`StateVector{DT,VT}` is a vector of [`State`](@ref)s, where `DT` is the datatype of the state and `VT` is the 
+`StateVector{DT,VT}` is a vector of [`StateVariable`](@ref)s, where `DT` is the datatype of the state and `VT` is the 
 type of the vector.
 """
-const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:State{DT}}}
+const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:StateVariable{DT}}}
 
 """
 `zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with [`zero`](@ref) applied all elements of `X`.
