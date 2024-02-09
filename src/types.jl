@@ -55,7 +55,7 @@ const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 
-abstract type AbstractStochasticProcess{dType, ndim} end
+abstract type AbstractStochasticProcess end
 
 """
 `StateVariable{T}` is a shortcut for `AbstractArray{T}` that can be extended in the future should the need arise.
