@@ -12,7 +12,7 @@ export OptionalInvariants,
        OptionalParameters,
        OptionalPeriodicity
 
-export AbstractData
+export AbstractData, AbstractStochasticProcess
 
 export StateVariable, StateVector, SolutionVector
 
@@ -54,6 +54,8 @@ const OptionalParameters    = Union{NamedTuple, NullParameters}
 const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
 
 const AbstractData = Union{Number, AbstractArray{<:Number}}
+
+abstract type AbstractStochasticProcess{dType, ndim} end
 
 """
 `StateVariable{T}` is a shortcut for `AbstractArray{T}` that can be extended in the future should the need arise.
