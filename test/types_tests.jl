@@ -72,29 +72,4 @@ end
     @test AbstractMatrix{Number} <: AbstractData
     @test AbstractMatrix{Int}    <: AbstractData
 
-    @test Matrix{Number} <: StateVariable
-    @test Matrix{Int}    <: StateVariable
-    @test Matrix{Number} <: StateVariable{Number}
-    @test Matrix{Int}    <: StateVariable{<:Number}
-    @test Matrix{Int}    <: StateVariable{Int}
-    @test AbstractMatrix{Number} <: StateVariable
-    @test AbstractMatrix{Int}    <: StateVariable
-
-    @test Vector{Matrix{Int}} <: StateVector
-    @test Vector{Matrix{Number}} <: StateVector
-    @test Vector{AbstractMatrix{Int}} <: StateVector
-    @test Vector{AbstractMatrix{Number}} <: StateVector
-
-    @test Vector{Int} <: SolutionVector
-    @test Vector{Int} <: SolutionVector{Int}
-    @test Vector{TwicePrecision{Int}} <: SolutionVector
-    @test Vector{TwicePrecision{Int}} <: SolutionVector{TwicePrecision{Int}}
-
-    @test vectorfield(rand(3)) == zeros(3)
-    @test vectorfield(rand(3,3)) == zeros(3,3)
-
-    GeometricBase.vectorfield(s::Vector) = zeros(axes(s))
-
-    @test vectorfield(rand(4)) == zeros(4)
-
 end

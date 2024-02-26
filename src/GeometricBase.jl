@@ -13,5 +13,6 @@ module GeometricBase
     include("data/system_types.jl")
     include("data/data_types.jl")
     include("data/geometric_data.jl")
+    include("data/state_variables.jl")
 
 end
