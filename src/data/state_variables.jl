@@ -4,6 +4,7 @@ import Base: axes, eachindex, getindex, parent, setindex!, size, zero
 export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVector
 
+export parenttype
 export add!, value, vectorfield, zerovector
 
 
@@ -29,10 +30,11 @@ Base.:(==)(x::AV, y::AV) where {AV <: AbstractVariable} = parent(x) == parent(y)
 abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT,0} end
 
 """
-`AbstractStateVariable{T,N}` is a wrapper around a `AbstractArray{T,N}` that provides context for the nature of the variable, e.g., a state or a vector field.
+`AbstractStateVariable{T,N,AT}` is a wrapper around a `AT <: AbstractArray{T,N}` that provides context for the nature of the variable, e.g., a state or a vector field.
 """
-abstract type AbstractStateVariable{DT,N} <: AbstractVariable{DT,N} end
+abstract type AbstractStateVariable{DT,N,AT} <: AbstractVariable{DT,N} end
 
+parenttype(::AbstractStateVariable{DT,N,AT}) where {DT,N,AT} = AT
 
 struct TimeVariable{DT} <: AbstractScalarVariable{DT}
     value::DT
@@ -56,19 +58,19 @@ Base.:(//)(a::TimeVariable, b::Number) = value(a) // b
 Base.:(//)(a::Number, b::TimeVariable) = a // value(b)
 
 
-struct StateVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N}
+struct StateVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
 
-struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N}
+struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
 
-struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N}
+struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
 
-struct Increment{DT, N, VT <: AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N}
+struct Increment{DT, N, VT <: AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,AT}
     var::VT
 end
 
