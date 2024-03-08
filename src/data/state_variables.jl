@@ -70,7 +70,7 @@ struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVaria
     value::AT
 end
 
-struct Increment{DT, N, VT <: AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,AT}
+struct Increment{DT, N, VT <: AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
     var::VT
 end
 
@@ -101,7 +101,7 @@ constant fields that should not be present in the vector field.
 vectorfield(s::AbstractStateVariable) = VectorfieldVariable(zero(parent(s)))
 
 
-struct StateWithError{DT, N, VT <: AbstractStateVariable{DT,N}} <: AbstractStateVariable{DT,N}
+struct StateWithError{DT, N, VT <: AbstractStateVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
     state::VT
     error::VT
 
