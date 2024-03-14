@@ -85,7 +85,17 @@ AlgebraicVariable(x::AlgebraicVariable) = AlgebraicVariable(parent(x))
 Increment(x::Increment) = Increment(parent(x))
 
 
-function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT,N,VT}
+function copy!(s::AbstractStateVariable{DT,N}, v::AbstractArray{DT,N}) where {DT,N}
+    @assert axes(s) == axes(v)
+    parent(s) .= v
+end
+
+function add!(s::AbstractStateVariable{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
+    @assert axes(s) == axes(Δs)
+    parent(s) .+= Δs
+end
+
+function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable}
     @assert axes(s) == axes(Δs)
     s .+= Δs
 end
@@ -113,7 +123,13 @@ end
 parent(s::StateWithError) = parent(s.state)
 zero(s::StateWithError) = StateWithError(zero(s.state))
 
-function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT,N,VT}
+function copy!(s::StateWithError{DT,N}, v::AbstractArray{DT,N}) where {DT,N}
+    @assert axes(s) == axes(v)
+    s.state .= v
+    s.error .= 0
+end
+
+function add!(s::StateWithError{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
     @assert axes(s) == axes(Δs)
     # compensated summation
     for k in eachindex(s.state, s.error, Δs)
@@ -130,6 +146,10 @@ function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT,N,V
         s.error[k] = ε
     end
     return s
+end
+
+function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable{DT,N}}
+    add!(s, parent(Δs))
 end
 
 

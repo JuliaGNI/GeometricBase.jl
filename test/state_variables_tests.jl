@@ -42,6 +42,15 @@ function test_statevariable(Var, X, x)
 
     @test_nowarn X[:] .= 3
     @test all(x .== 3)
+
+    @test_nowarn copy!(X, zero(X))
+    @test all(x .== 0)
+    @test_nowarn add!(X, ones(size(x)))
+    @test_nowarn add!(X, ones(size(x)))
+    @test x == 2 .* ones(size(x))
+
+    @test_nowarn copy!(X, zero(parent(X)))
+    @test all(x .== 0)
 end
 
 
