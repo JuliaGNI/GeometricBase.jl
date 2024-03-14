@@ -19,6 +19,8 @@ description(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 reference(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 
 
+isAbstractMethod(::Any) = false
+
 function isAbstractMethod(method::AbstractMethod)
     isexplicit(method) === missing && return false
     isimplicit(method) === missing && return false

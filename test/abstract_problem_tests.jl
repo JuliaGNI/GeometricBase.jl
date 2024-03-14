@@ -2,10 +2,11 @@ using GeometricBase
 using Test
 
 
-struct MyProblem <: AbstractProblem end
+struct TestProblem <: AbstractProblem end
 
-problem = MyProblem()
+problem = TestProblem()
 
 # @test !isAbstractProblem(problem)
 
 @test isAbstractProblem(problem)
+@test !isAbstractProblem(42)

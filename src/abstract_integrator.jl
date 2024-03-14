@@ -25,6 +25,8 @@ integrate!(integrator)
 function integrate! end
 
 
+isAbstractIntegrator(::Any) = false
+
 function isAbstractIntegrator(int::AbstractIntegrator)
     applicable(integrate!, int) || return false
     return true

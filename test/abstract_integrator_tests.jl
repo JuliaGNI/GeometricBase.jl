@@ -2,12 +2,13 @@ using GeometricBase
 using Test
 
 
-struct MyIntegrator <: AbstractIntegrator end
+struct TestIntegrator <: AbstractIntegrator end
 
-int = MyIntegrator()
+int = TestIntegrator()
 
 @test !isAbstractIntegrator(int)
 
-function GeometricBase.integrate!(::MyIntegrator) end
+function GeometricBase.integrate!(::TestIntegrator) end
 
 @test isAbstractIntegrator(int)
+@test !isAbstractIntegrator(42)

@@ -2,22 +2,23 @@ using GeometricBase
 using Test
 
 
-struct MyMethod <: AbstractMethod end
+struct TestMethod <: AbstractMethod end
 
-method = MyMethod()
+method = TestMethod()
 
 @test !isAbstractMethod(method)
 
-GeometricBase.isexplicit(method::MyMethod) = true
-GeometricBase.isimplicit(method::MyMethod) = false
-GeometricBase.issymmetric(method::MyMethod) = false
-GeometricBase.issymplectic(method::MyMethod) = false
-GeometricBase.isenergypreserving(method::MyMethod) = false
-GeometricBase.isstifflyaccurate(method::MyMethod) = false
+GeometricBase.isexplicit(method::TestMethod) = true
+GeometricBase.isimplicit(method::TestMethod) = false
+GeometricBase.issymmetric(method::TestMethod) = false
+GeometricBase.issymplectic(method::TestMethod) = false
+GeometricBase.isenergypreserving(method::TestMethod) = false
+GeometricBase.isstifflyaccurate(method::TestMethod) = false
 
-GeometricBase.order(::Union{MyMethod, Type{<:MyMethod}}) = 0
-GeometricBase.name(::Union{MyMethod, Type{<:MyMethod}}) = "My Method"
-GeometricBase.description(::Union{MyMethod, Type{<:MyMethod}}) = "Test Method"
-GeometricBase.reference(::Union{MyMethod, Type{<:MyMethod}}) = "n/a"
+GeometricBase.order(::Union{TestMethod, Type{<:TestMethod}}) = 0
+GeometricBase.name(::Union{TestMethod, Type{<:TestMethod}}) = "My Method"
+GeometricBase.description(::Union{TestMethod, Type{<:TestMethod}}) = "Test Method"
+GeometricBase.reference(::Union{TestMethod, Type{<:TestMethod}}) = "n/a"
 
 @test isAbstractMethod(method)
+@test !isAbstractMethod(42)
