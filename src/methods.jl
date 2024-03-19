@@ -13,6 +13,7 @@ function reset! end
 
 function ntime end
 function nsave end
+function nstore end
 function nsteps end
 function nsamples end
 function nconstraints end

@@ -9,6 +9,7 @@ module GeometricBase
     include("abstract_problem.jl")
     include("abstract_method.jl")
     include("abstract_integrator.jl")
+    include("abstract_solution.jl")
     include("abstract_solver.jl")
 
     include("data/system_types.jl")
