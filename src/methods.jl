@@ -10,6 +10,7 @@ function evaluate end
 function evaluate! end
 
 function reset! end
+function update! end
 
 function ntime end
 function nsave end
