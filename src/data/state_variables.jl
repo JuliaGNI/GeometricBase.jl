@@ -1,5 +1,5 @@
 
-import Base: axes, eachindex, getindex, parent, setindex!, size, zero
+import Base: axes, copy!, eachindex, getindex, parent, setindex!, size, zero
 
 export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVector
