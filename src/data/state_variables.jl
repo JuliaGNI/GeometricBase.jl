@@ -100,9 +100,14 @@ AlgebraicVariable(x::AlgebraicVariable) = AlgebraicVariable(parent(x))
 Increment(x::Increment) = Increment(parent(x))
 
 
-function copy!(s::AbstractStateVariable{DT,N}, v::AbstractArray{DT,N}) where {DT,N}
-    @assert axes(s) == axes(v)
-    parent(s) .= v
+function copy!(dst::AbstractStateVariable{DT,N}, src::AbstractArray{DT,N}) where {DT,N}
+    @assert axes(dst) == axes(src)
+    parent(dst) .= src
+end
+
+function copy!(dst::AbstractStateVariable{DT,N}, src::AbstractStateVariable{DT,N}) where {DT,N}
+    @assert axes(dst) == axes(src)
+    copy!(parent(dst), parent(src))
 end
 
 function add!(s::AbstractStateVariable{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
@@ -138,10 +143,16 @@ end
 parent(s::StateWithError) = parent(s.state)
 zero(s::StateWithError) = StateWithError(zero(s.state))
 
-function copy!(s::StateWithError{DT,N}, v::AbstractArray{DT,N}) where {DT,N}
-    @assert axes(s) == axes(v)
-    s.state .= v
-    s.error .= 0
+function copy!(dst::StateWithError{DT,N}, src::AbstractArray{DT,N}) where {DT,N}
+    @assert axes(dst) == axes(src)
+    copy!(dst.state, src)
+    dst.error .= 0
+end
+
+function copy!(dst::StateWithError{DT,N}, src::StateWithError{DT,N}) where {DT,N}
+    @assert axes(dst) == axes(src)
+    copy!(dst.state, src.state)
+    dst.error .= 0
 end
 
 function add!(s::StateWithError{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
