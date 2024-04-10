@@ -7,5 +7,6 @@ using SafeTestsets
 @safetestset "Abstract Solver                                                                 " begin include("abstract_solver_tests.jl") end
 @safetestset "Geometric Data                                                                  " begin include("geometric_data_tests.jl") end
 @safetestset "State Variables                                                                 " begin include("state_variables_tests.jl") end
+@safetestset "Methods                                                                         " begin include("methods_tests.jl") end
 @safetestset "Types                                                                           " begin include("types_tests.jl") end
 @safetestset "Utils                                                                           " begin include("utils_tests.jl") end

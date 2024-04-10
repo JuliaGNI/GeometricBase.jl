@@ -6,6 +6,19 @@ struct TestMethod <: AbstractMethod end
 
 method = TestMethod()
 
+@test parent(method) === nothing
+
+@test ismissing(GeometricBase.isexplicit(method))
+@test ismissing(GeometricBase.isimplicit(method))
+@test ismissing(GeometricBase.issymmetric(method))
+@test ismissing(GeometricBase.issymplectic(method))
+@test ismissing(GeometricBase.isenergypreserving(method))
+@test ismissing(GeometricBase.isstifflyaccurate(method))
+@test ismissing(GeometricBase.order(method))
+@test ismissing(GeometricBase.name(method))
+@test ismissing(GeometricBase.description(method))
+@test ismissing(GeometricBase.reference(method))
+
 @test !isAbstractMethod(method)
 
 GeometricBase.isexplicit(method::TestMethod) = true

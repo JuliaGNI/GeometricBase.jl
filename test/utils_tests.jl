@@ -21,6 +21,16 @@ using Test
 end
 
 
+@testset "$(rpad("Norms",80))" begin
+
+    x = [3.0, 4.0]
+
+    @test L2norm(x) == 25.
+    @test l2norm(x) == 5.
+
+end
+
+
 @testset "$(rpad("Summation",80))" begin
     
     n = 100000
