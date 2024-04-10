@@ -58,9 +58,24 @@ Base.:(//)(a::TimeVariable, b::Number) = value(a) // b
 Base.:(//)(a::Number, b::TimeVariable) = a // value(b)
 
 
-struct StateVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
+struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
     value::AT
+    range::RT
+    periodic::PT
+
+    function StateVariable(value::AT, range::RT, periodic::PT) where {DT, N, AT <: AbstractArray{DT,N}, RT <: Union{Tuple{DT,DT},Tuple{AT,AT}}, PT <: Union{Missing,BitArray{N}}}
+        RT <: Tuple{AT,AT} && @assert axes(range[1]) == axes(range[2]) == axes(value)
+        PT <: BitArray && @assert axes(periodic) == axes(value)
+        new{DT, N, AT, RT, PT}(value, range, periodic)
+    end
 end
+
+function StateVariable(value::AT) where {DT, N, AT <: AbstractArray{DT,N}}
+    StateVariable(value, (typemin(DT),typemax(DT)), missing)
+end
+
+zero(a::StateVariable) = StateVariable(zero(parent(a)), a.range, a.periodic)
+
 
 struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
