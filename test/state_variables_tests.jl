@@ -49,9 +49,9 @@ function test_statevariable(Var, X, x)
 
     @test_nowarn copy!(X, zero(X))
     @test all(x .== 0)
-    @test_nowarn add!(X, ones(size(x)))
-    @test_nowarn add!(X, ones(size(x)))
-    @test x == 2 .* ones(size(x))
+    @test_nowarn add!(X, ones(eltype(x), size(x)))
+    @test_nowarn add!(X, ones(eltype(x), size(x)))
+    @test x == 2 .* ones(eltype(x), size(x))
 
     @test_nowarn copy!(X, zero(parent(X)))
     @test all(x .== 0)
@@ -89,9 +89,8 @@ end
 
 @testset "$(rpad("State Variables",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
-
-        for inds in ((4,), (3,4))
-            x = rand(inds...)
+        for DT in (Float32, Float64), inds in ((4,), (3,4))
+            x = rand(DT, inds...)
             X = Var(x)
 
             @test X == Var(X)
@@ -113,9 +112,9 @@ end
         @test typeof(Var(ones(Float64, 3, 4))) <: AbstractStateVariable{Float64,2}
         @test typeof(Var(ones(Int, 3, 4))) <: AbstractStateVariable{Int,2}
 
-        for inds in ((4,), (3,4))
-            x = rand(inds...)
-            y = rand(inds...)
+        for DT in (Float32, Float64), inds in ((4,), (3,4))
+            x = rand(DT, inds...)
+            y = rand(DT, inds...)
             X = Var(copy(x))
             Y = Increment(Var(y))
 
@@ -138,9 +137,9 @@ end
         @test typeof(Increment(Var(ones(Float64, 3, 4)))) <: AbstractStateVariable{Float64,2}
         @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int,2}
     
-        for inds in ((4,), (3,4))
-            x = rand(inds...)
-            y = rand(inds...)
+        for DT in (Float32, Float64), inds in ((4,), (3,4))
+            x = rand(DT, inds...)
+            y = rand(DT, inds...)
             X = StateWithError(Var(x))
             Y = Increment(Var(y))
 
@@ -149,7 +148,7 @@ end
             @test axes(X.state) == axes(X.error)
             @test eltype(X.state) == eltype(X.error)
 
-            x = rand(inds...)
+            x = rand(DT, inds...)
             X = StateWithError(Var(copy(x)))
             
             @test_nowarn add!(X, Y)
