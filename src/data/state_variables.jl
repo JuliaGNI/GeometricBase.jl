@@ -127,6 +127,7 @@ Increment(x::Increment) = Increment(parent(x))
 
 parent(i::Increment) = i.var
 
+reset!(i::Increment) = parent(parent(i)) .= 0
 
 function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable{DT,N}}
     @assert axes(s) == axes(Δs)
