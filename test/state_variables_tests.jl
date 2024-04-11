@@ -19,26 +19,30 @@ function test_statevariable(Var, X, x)
     @test X[end] == x[end]
     @test X[:] == x[:]
 
-    @test X[1,1] == x[1,1]
-    @test X[2,3] == x[2,3]
-    @test X[3,2] == x[3,2]
-    @test X[begin,2] == x[begin,2]
-    @test X[2,end] == x[2,end]
-    @test X[:,2] == x[:,2]
-    @test X[2,:] == x[2,:]
-    @test X[:,:] == x[:,:]
-
     @test_nowarn X[1] = 23
-    @test x[1,1] == 23
+    @test_nowarn X[4] = 42
 
-    @test_nowarn X[2,2] = 42
-    @test x[2,2] == 42
+    if ndims(x) > 1
+        @test X[1,1] == x[1,1]
+        @test X[2,3] == x[2,3]
+        @test X[3,2] == x[3,2]
+        @test X[begin,2] == x[begin,2]
+        @test X[2,end] == x[2,end]
+        @test X[:,2] == x[:,2]
+        @test X[2,:] == x[2,:]
+        @test X[:,:] == x[:,:]
 
-    @test_nowarn X[:,3] .= 1
-    @test all(x[:,3] .== 1)
+        @test x[1,1] == 23
 
-    @test_nowarn X[3,:] .= 2
-    @test all(x[3,:] .== 2)
+        @test_nowarn X[2,2] = 42
+        @test x[2,2] == 42
+
+        @test_nowarn X[:,3] .= 1
+        @test all(x[:,3] .== 1)
+
+        @test_nowarn X[3,:] .= 2
+        @test all(x[3,:] .== 2)
+    end
 
     @test_nowarn X[:] .= 3
     @test all(x .== 3)
@@ -86,15 +90,17 @@ end
 @testset "$(rpad("State Variables",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
 
-        x = rand(3,4)
-        X = Var(x)
+        for inds in ((4,), (3,4))
+            x = rand(inds...)
+            X = Var(x)
 
-        @test X == Var(X)
+            @test X == Var(X)
 
-        test_statevariable(Var, X, x)
+            test_statevariable(Var, X, x)
 
-        @test typeof(vectorfield(X)) <: VectorfieldVariable
-        @test parent(vectorfield(X)) == zero(x)
+            @test typeof(vectorfield(X)) <: VectorfieldVariable
+            @test parent(vectorfield(X)) == zero(x)
+        end
     end
 end
 
@@ -106,19 +112,20 @@ end
         @test typeof(Var(ones(Int, 3))) <: AbstractVariable{Int,1}
         @test typeof(Var(ones(Float64, 3, 4))) <: AbstractStateVariable{Float64,2}
         @test typeof(Var(ones(Int, 3, 4))) <: AbstractStateVariable{Int,2}
-    
-        x = rand(3,4)
-        y = rand(3,4)
-        X = Var(copy(x))
-        Y = Increment(Var(y))
 
-        @test Y == Increment(Y)
+        for inds in ((4,), (3,4))
+            x = rand(inds...)
+            y = rand(inds...)
+            X = Var(copy(x))
+            Y = Increment(Var(y))
 
-        test_statevariable(Var, Y, y)
+            @test Y == Increment(Y)
 
-        @test_nowarn add!(X, Y)
-        @test all(parent(X) .== x .+ y)
+            test_statevariable(Var, Y, y)
 
+            @test_nowarn add!(X, Y)
+            @test all(parent(X) .== x .+ y)
+        end
     end
 end
 
@@ -131,26 +138,28 @@ end
         @test typeof(Increment(Var(ones(Float64, 3, 4)))) <: AbstractStateVariable{Float64,2}
         @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int,2}
     
-        x = rand(3,4)
-        y = rand(3,4)
-        X = StateWithError(Var(x))
-        Y = Increment(Var(y))
+        for inds in ((4,), (3,4))
+            x = rand(inds...)
+            y = rand(inds...)
+            X = StateWithError(Var(x))
+            Y = Increment(Var(y))
 
-        test_statevariable(Var, X, x)
+            test_statevariable(Var, X, x)
 
-        @test axes(X.state) == axes(X.error)
-        @test eltype(X.state) == eltype(X.error)
+            @test axes(X.state) == axes(X.error)
+            @test eltype(X.state) == eltype(X.error)
 
-        x = rand(3,4)
-        X = StateWithError(Var(copy(x)))
-        
-        @test_nowarn add!(X, Y)
-        @test all(parent(X) .== x .+ y)
-        @test all(X.error .!== 0)
+            x = rand(inds...)
+            X = StateWithError(Var(copy(x)))
+            
+            @test_nowarn add!(X, Y)
+            @test all(parent(X) .== x .+ y)
+            @test all(X.error .!== 0)
 
-        @test_nowarn copy!(X, y)
-        @test_nowarn copy!(X, Var(y))
-        @test_nowarn copy!(X, StateWithError(Var(y)))
+            @test_nowarn copy!(X, y)
+            @test_nowarn copy!(X, Var(y))
+            @test_nowarn copy!(X, StateWithError(Var(y)))
+        end
     end
 end
 

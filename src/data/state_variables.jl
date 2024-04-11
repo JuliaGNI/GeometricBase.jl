@@ -36,6 +36,28 @@ abstract type AbstractStateVariable{DT,N,AT} <: AbstractVariable{DT,N} end
 
 parenttype(::AbstractStateVariable{DT,N,AT}) where {DT,N,AT} = AT
 
+function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AT) where {DT, N, AT <: AbstractArray{DT,N}}
+    @assert axes(dst) == axes(src)
+    parent(dst) .= src
+end
+
+# This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
+function copy!(dst::AbstractStateVariable{DT,1,AT}, src::AT) where {DT, AT <: AbstractVector{DT}}
+    @assert axes(dst) == axes(src)
+    parent(dst) .= src
+end
+
+function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AbstractStateVariable{DT,N,AT}) where {DT, N, AT <: AbstractArray{DT,N}}
+    @assert axes(dst) == axes(src)
+    copy!(parent(dst), parent(src))
+end
+
+function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT, N, AT <: AbstractArray{DT,N}}
+    @assert axes(s) == axes(Δs)
+    parent(s) .+= Δs
+end
+
+
 struct TimeVariable{DT} <: AbstractScalarVariable{DT}
     value::DT
 end
@@ -74,6 +96,10 @@ function StateVariable(value::AT) where {DT, N, AT <: AbstractArray{DT,N}}
     StateVariable(value, (typemin(DT),typemax(DT)), missing)
 end
 
+StateVariable(x::StateVariable) = StateVariable(parent(x))
+
+parent(s::StateVariable) = s.value
+
 zero(a::StateVariable) = StateVariable(zero(parent(a)), a.range, a.periodic)
 
 
@@ -81,43 +107,39 @@ struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVar
     value::AT
 end
 
+VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
+
+parent(v::VectorfieldVariable) = v.value
+
 struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
+
+AlgebraicVariable(x::AlgebraicVariable) = AlgebraicVariable(parent(x))
+
+parent(a::AlgebraicVariable) = a.value
 
 struct Increment{DT, N, VT <: AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
     var::VT
 end
 
-parent(s::StateVariable) = s.value
-parent(v::VectorfieldVariable) = v.value
-parent(a::AlgebraicVariable) = a.value
-parent(i::Increment) = i.var
-
-StateVariable(x::StateVariable) = StateVariable(parent(x))
-VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
-AlgebraicVariable(x::AlgebraicVariable) = AlgebraicVariable(parent(x))
 Increment(x::Increment) = Increment(parent(x))
 
+parent(i::Increment) = i.var
 
-function copy!(dst::AbstractStateVariable{DT,N}, src::AbstractArray{DT,N}) where {DT,N}
-    @assert axes(dst) == axes(src)
-    parent(dst) .= src
-end
 
-function copy!(dst::AbstractStateVariable{DT,N}, src::AbstractStateVariable{DT,N}) where {DT,N}
-    @assert axes(dst) == axes(src)
-    copy!(parent(dst), parent(src))
-end
-
-function add!(s::AbstractStateVariable{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
-    @assert axes(s) == axes(Δs)
-    parent(s) .+= Δs
-end
-
-function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable}
+function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable{DT,N}}
     @assert axes(s) == axes(Δs)
     s .+= Δs
+end
+
+function add!(s::Increment{DT,N,VT}, Δs::AT) where {DT, N, AT <: AbstractArray{DT,N}, VT <: AbstractStateVariable{DT,N,AT}}
+    @assert axes(s) == axes(Δs)
+    parent(parent(s)) .+= Δs
+end
+
+function add!(s::Increment{DT,N,VT}, Δs::VT) where {DT, N, VT <: AbstractStateVariable{DT,N}}
+    add!(parent(parent(s)), parent(Δs))
 end
 
 
@@ -143,14 +165,22 @@ end
 parent(s::StateWithError) = parent(s.state)
 zero(s::StateWithError) = StateWithError(zero(s.state))
 
-function copy!(dst::StateWithError{DT,N}, src::AbstractArray{DT,N}) where {DT,N}
+function copy!(dst::StateWithError{DT,N,VT}, src::AT) where {DT, N, AT <: AbstractArray{DT,N}, VT <: AbstractStateVariable{DT,N,AT}}
+    @assert axes(dst) == axes(src)
+    copy!(dst.state, src)
+    dst.error .= 0
+end
+
+# This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
+function copy!(dst::StateWithError{DT,1,VT}, src::AT) where {DT, AT <: AbstractVector{DT}, VT <: AbstractStateVariable{DT,1,AT}}
     @assert axes(dst) == axes(src)
     copy!(dst.state, src)
     dst.error .= 0
 end
 
 function copy!(dst::StateWithError{DT,N,VT}, src::VT) where {DT, N, VT <: AbstractStateVariable{DT,N}}
-    copy!(dst, parent(src))
+    copy!(parent(dst), parent(src))
+    dst.error .= 0
 end
 
 function copy!(dst::StateWithError{DT,N,VT}, src::StateWithError{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable{DT,N}}
@@ -159,7 +189,7 @@ function copy!(dst::StateWithError{DT,N,VT}, src::StateWithError{DT,N,VT}) where
     copy!(dst.error, src.error)
 end
 
-function add!(s::StateWithError{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}
+function add!(s::StateWithError{DT,N,VT}, Δs::AT) where {DT, N, AT <: AbstractArray{DT,N}, VT <: AbstractStateVariable{DT,N,AT}}
     @assert axes(s) == axes(Δs)
     # compensated summation
     for k in eachindex(s.state, s.error, Δs)
