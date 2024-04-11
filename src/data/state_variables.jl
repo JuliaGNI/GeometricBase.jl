@@ -149,10 +149,14 @@ function copy!(dst::StateWithError{DT,N}, src::AbstractArray{DT,N}) where {DT,N}
     dst.error .= 0
 end
 
-function copy!(dst::StateWithError{DT,N}, src::StateWithError{DT,N}) where {DT,N}
+function copy!(dst::StateWithError{DT,N,VT}, src::VT) where {DT, N, VT <: AbstractStateVariable{DT,N}}
+    copy!(dst, parent(src))
+end
+
+function copy!(dst::StateWithError{DT,N,VT}, src::StateWithError{DT,N,VT}) where {DT, N, VT <: AbstractStateVariable{DT,N}}
     @assert axes(dst) == axes(src)
     copy!(dst.state, src.state)
-    dst.error .= 0
+    copy!(dst.error, src.error)
 end
 
 function add!(s::StateWithError{DT,N}, Δs::AbstractArray{DT,N}) where {DT, N}

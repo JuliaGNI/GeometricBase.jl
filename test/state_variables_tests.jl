@@ -148,6 +148,9 @@ end
         @test all(parent(X) .== x .+ y)
         @test all(X.error .!== 0)
 
+        @test_nowarn copy!(X, y)
+        @test_nowarn copy!(X, Var(y))
+        @test_nowarn copy!(X, StateWithError(Var(y)))
     end
 end
 
