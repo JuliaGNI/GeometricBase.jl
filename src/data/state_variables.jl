@@ -4,8 +4,8 @@ import Base: axes, copy!, eachindex, getindex, parent, setindex!, size, zero
 export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVector
 
-export parenttype
-export add!, value, vectorfield, zerovector
+export isperiodic, parenttype
+export add!, reset!, value, vectorfield, zerovector
 
 
 """
@@ -99,6 +99,9 @@ end
 StateVariable(x::StateVariable) = StateVariable(parent(x))
 
 parent(s::StateVariable) = s.value
+
+isperiodic(::StateVariable{DT,N,AT,RT,Missing}) where {DT,N,AT,RT} = false
+isperiodic(::StateVariable{DT,N,AT,RT,BitArray{N}}) where {DT,N,AT,RT} = true
 
 zero(a::StateVariable) = StateVariable(zero(parent(a)), a.range, a.periodic)
 
