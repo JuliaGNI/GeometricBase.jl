@@ -29,6 +29,9 @@ Base.:(==)(x::AV, y::AV) where {AV <: AbstractVariable} = parent(x) == parent(y)
 """
 abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT,0} end
 
+Base.:(==)(x::AbstractScalarVariable, y::Number) = value(x) == y
+Base.:(==)(x::Number, y::AbstractScalarVariable) = y == x
+
 """
 `AbstractStateVariable{T,N,AT}` is a wrapper around a `AT <: AbstractArray{T,N}` that provides context for the nature of the variable, e.g., a state or a vector field.
 """
