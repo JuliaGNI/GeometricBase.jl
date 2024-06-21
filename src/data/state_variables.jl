@@ -58,8 +58,8 @@ function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT, N, AT <: Ab
 end
 
 
-struct TimeVariable{DT} <: AbstractScalarVariable{DT}
-    value::DT
+struct TimeVariable{DT <: Number, AT <: AbstractArray{DT,0}} <: AbstractScalarVariable{DT}
+    value::AT
 end
 
 TimeVariable(x::TimeVariable) = TimeVariable(parent(x))
