@@ -8,6 +8,7 @@ function equtype end
 
 function evaluate end
 function evaluate! end
+function solutionstep! end
 
 function reset! end
 function update! end
