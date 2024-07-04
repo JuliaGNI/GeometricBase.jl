@@ -38,6 +38,7 @@ function solutions end
 function invariants end
 function parameters end
 function periodicity end
+function initialguess end
 
 function order end
 function coefficients end
