@@ -1,8 +1,8 @@
 using Test
 
-import GeometricBase: tbegin, tend, tspan
+import GeometricBase: initialtime, finaltime, timespan
 
-tspan(x::StepRangeLen) = x
+timespan(x::StepRangeLen) = x
 
-@test tbegin(0:0.1:1) == 0.0
-@test tend(0:0.1:1) == 1.0
+@test initialtime(0:0.1:1) == 0.0
+@test finaltime(0:0.1:1) == 1.0

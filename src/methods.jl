@@ -20,16 +20,14 @@ function nsteps end
 function nsamples end
 function nconstraints end
 
-function tspan end
-function tstep end
-
-tbegin(x) = tspan(x)[begin]
-tend(x) = tspan(x)[end]
-
 function eachsample end
 function eachtimestep end
+function timespan end
 function timestep end
 function timesteps end
+
+initialtime(x) = timespan(x)[begin]
+finaltime(x) = timespan(x)[end]
 
 function equation end
 function equations end
