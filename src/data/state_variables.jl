@@ -112,8 +112,8 @@ zero(a::StateVariable) = StateVariable(zero(parent(a)), a.range, a.periodic)
 struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
-
 VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
+VectorfieldVariable(x::StateVariable) = VectorfieldVariable(zero(parent(x)))
 
 parent(v::VectorfieldVariable) = v.value
 
@@ -122,6 +122,7 @@ struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVaria
 end
 
 AlgebraicVariable(x::AlgebraicVariable) = AlgebraicVariable(parent(x))
+AlgebraicVariable(x::StateVariable) = AlgebraicVariable(zero(parent(x)))
 
 parent(a::AlgebraicVariable) = a.value
 
@@ -208,7 +209,7 @@ function add!(s::StateWithError{DT,N,VT}, Δs::AT) where {DT, N, AT <: AbstractA
         ε = ε + δ
         x = a + ε
         ε = ε + (a - x)
-        
+
         s.state[k] = x
         s.error[k] = ε
     end
@@ -221,7 +222,7 @@ end
 
 
 """
-`StateVector{DT,VT}` is a vector of [`StateVariable`](@ref)s, where `DT` is the datatype of the state and `VT` is the 
+`StateVector{DT,VT}` is a vector of [`StateVariable`](@ref)s, where `DT` is the datatype of the state and `VT` is the
 type of the vector.
 """
 const StateVector{DT,VT} = VT where {DT, VT <: AbstractVector{<:AbstractStateVariable{DT}}}
