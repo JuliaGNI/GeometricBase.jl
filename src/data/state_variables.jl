@@ -88,25 +88,50 @@ struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
     range::RT
     periodic::PT
 
-    function StateVariable(value::AT, range::RT, periodic::PT) where {DT, N, AT <: AbstractArray{DT,N}, RT <: Union{Tuple{DT,DT},Tuple{AT,AT}}, PT <: Union{Missing,BitArray{N}}}
-        RT <: Tuple{AT,AT} && @assert axes(range[1]) == axes(range[2]) == axes(value)
-        PT <: BitArray && @assert axes(periodic) == axes(value)
+    function StateVariable(value::AT, range::RT, periodic::PT) where {DT, N, AT <: AbstractArray{DT,N}, RT <: Tuple{AT,AT}, PT <: BitArray{N}}
+        @assert axes(value) == axes(range[1]) == axes(range[2]) == axes(periodic)
         new{DT, N, AT, RT, PT}(value, range, periodic)
     end
 end
 
-function StateVariable(value::AT) where {DT, N, AT <: AbstractArray{DT,N}}
-    StateVariable(value, (typemin(DT),typemax(DT)), missing)
+function StateVariable(value::AT, range::RT) where {DT, N, AT <: AbstractArray{DT,N}, RT <: Tuple{AT,AT}}
+    periodic = BitArray(range[begin][i] ≠ -Inf(DT) && range[end][i] ≠ +Inf(DT) for i in eachindex(range[begin], range[end]))
+    StateVariable(value, (range[begin], range[end]), periodic)
 end
 
-StateVariable(x::StateVariable) = StateVariable(parent(x))
+StateVariable(value::AT, range_min::AT, range_max::AT) where {DT, N, AT <: AbstractArray{DT,N}} = StateVariable(value, (range_min,range_max))
 
-parent(s::StateVariable) = s.value
+function StateVariable(value::AT) where {DT, N, AT <: AbstractArray{DT,N}}
+    range_min = zero(value)
+    range_max = zero(value)
 
-isperiodic(::StateVariable{DT,N,AT,RT,Missing}) where {DT,N,AT,RT} = false
-isperiodic(::StateVariable{DT,N,AT,RT,BitArray{N}}) where {DT,N,AT,RT} = true
+    range_min .= typemin(DT)
+    range_max .= typemax(DT)
 
-zero(a::StateVariable) = StateVariable(zero(parent(a)), a.range, a.periodic)
+    StateVariable(value, (range_min, range_max), falses(axes(value)))
+end
+
+StateVariable(value, ::NullPeriodicity) = StateVariable(value)
+
+StateVariable(s::StateVariable) = StateVariable(parent(s), range(s), periodic(s))
+
+value(s::StateVariable) = s.value
+range(s::StateVariable) = s.range
+periodic(s::StateVariable) = s.periodic
+
+value(s::StateVariable, i) = s.value[i]
+range(s::StateVariable, i) = s.range[i]
+periodic(s::StateVariable, i) = s.periodic[i]
+
+parent(s::StateVariable) = value(s)
+
+Base.eachindex(s::StateVariable) = eachindex(parent(s))
+
+isperiodic(s::StateVariable) = any(periodic(s))
+
+zero(s::StateVariable) = StateVariable(zero(parent(s)), range(s), periodic(s))
+
+verifyrange(s::StateVariable) = BitArray(value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end] for i in eachindex(s))
 
 
 struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
