@@ -4,8 +4,8 @@ import Base: axes, copy!, eachindex, getindex, parent, setindex!, size, zero
 export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVector
 
-export isperiodic, parenttype
-export add!, reset!, value, vectorfield, zerovector
+export isperiodic, parenttype, verifyrange
+export add!, reset!, periodic, value, vectorfield, zerovector
 
 
 """
@@ -95,7 +95,7 @@ struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
 end
 
 function StateVariable(value::AT, range::RT) where {DT, N, AT <: AbstractArray{DT,N}, RT <: Tuple{AT,AT}}
-    periodic = BitArray(range[begin][i] ≠ -Inf(DT) && range[end][i] ≠ +Inf(DT) for i in eachindex(range[begin], range[end]))
+    periodic = BitArray(range[begin][i] ≠ -DT(Inf) && range[end][i] ≠ +DT(Inf) for i in eachindex(range[begin], range[end]))
     StateVariable(value, (range[begin], range[end]), periodic)
 end
 
@@ -116,15 +116,16 @@ StateVariable(value, ::NullPeriodicity) = StateVariable(value)
 StateVariable(s::StateVariable) = StateVariable(parent(s), range(s), periodic(s))
 
 value(s::StateVariable) = s.value
-range(s::StateVariable) = s.range
+Base.range(s::StateVariable) = s.range
 periodic(s::StateVariable) = s.periodic
 
 value(s::StateVariable, i) = s.value[i]
-range(s::StateVariable, i) = s.range[i]
+Base.range(s::StateVariable, i) = (s.range[begin][i],s.range[end][i])
 periodic(s::StateVariable, i) = s.periodic[i]
 
 parent(s::StateVariable) = value(s)
 
+Base.axes(s::StateVariable) = axes(parent(s))
 Base.eachindex(s::StateVariable) = eachindex(parent(s))
 
 isperiodic(s::StateVariable) = any(periodic(s))

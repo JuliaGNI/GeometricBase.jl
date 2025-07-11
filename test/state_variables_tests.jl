@@ -4,7 +4,7 @@ using Test
 
 
 function test_statevariable(Var, X, x)
-    
+
     @test axes(X) == axes(x)
     @test size(X) == size(x)
     @test eachindex(X) == eachindex(x)
@@ -101,6 +101,28 @@ end
             @test parent(vectorfield(X)) == zero(x)
         end
     end
+
+    for DT in (Float32, Float64), inds in ((4,), (3,4))
+        x = rand(DT, inds...)
+        X = StateVariable(x)
+
+        @test axes(X) == axes(value(X))
+        @test axes(X) == axes(range(X)[begin]) == axes(range(X)[end])
+        @test axes(X) == axes(periodic(X))
+
+        @test value(X, 3) == value(X)[3]
+        @test value(X, :) == value(X)[:]
+
+        @test range(X, 3) == (range(X)[begin][3], range(X)[end][3])
+        @test range(X, :) == (range(X)[begin][:], range(X)[end][:])
+
+        @test periodic(X, 3) == periodic(X)[3]
+        @test periodic(X, :) == periodic(X)[:]
+
+    end
+
+    X = StateVariable([0., 1., 2.], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
+    @test verifyrange(X) == BitArray([true, true, false])
 end
 
 
@@ -136,7 +158,7 @@ end
         @test typeof(Increment(Var(ones(Int, 3)))) <: AbstractVariable{Int,1}
         @test typeof(Increment(Var(ones(Float64, 3, 4)))) <: AbstractStateVariable{Float64,2}
         @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int,2}
-    
+
         for DT in (Float32, Float64), inds in ((4,), (3,4))
             x = rand(DT, inds...)
             y = rand(DT, inds...)
@@ -150,7 +172,7 @@ end
 
             x = rand(DT, inds...)
             X = StateWithError(Var(copy(x)))
-            
+
             @test_nowarn add!(X, Y)
             @test all(parent(X) .== x .+ y)
             @test all(X.error .!== 0)
