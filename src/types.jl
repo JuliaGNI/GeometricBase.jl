@@ -46,7 +46,7 @@ const OptionalTuple         = Union{Nothing, Tuple}
 
 const OptionalInvariants    = Union{NamedTuple, NullInvariants}
 const OptionalParameters    = Union{NamedTuple, NullParameters}
-const OptionalPeriodicity   = Union{AbstractArray, NullPeriodicity}
+const OptionalPeriodicity   = Union{Tuple{AT,AT}, NullPeriodicity} where {AT <: AbstractArray}
 
 const AbstractData = Union{Number, AbstractArray{<:Number}}
 

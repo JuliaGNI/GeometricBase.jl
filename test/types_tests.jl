@@ -4,7 +4,7 @@ using Test
 
 
 @testset "$(rpad("Null Types",80))" begin
-    
+
     invs = NullInvariants()
     @test_throws ErrorException invs[1]
     @test_throws ErrorException for i in invs end
@@ -54,17 +54,15 @@ end
     @test NullParameters  <: OptionalParameters
     @test NamedTuple      <: OptionalParameters
 
-    @test NullPeriodicity <: OptionalPeriodicity
-    @test AbstractArray   <: OptionalPeriodicity
-    @test Array           <: OptionalPeriodicity
-    @test Matrix          <: OptionalPeriodicity
-    @test Matrix{Int}     <: OptionalPeriodicity
+    @test NullPeriodicity                <: OptionalPeriodicity
+    @test typeof((rand(3,3), rand(3,3))) <: OptionalPeriodicity
+    @test !(typeof((rand(2), rand(3,3))) <: OptionalPeriodicity)
 
 end
 
 
 @testset "$(rpad("Data Types",80))" begin
-    
+
     @test Number <: AbstractData
     @test Int    <: AbstractData
     @test Matrix{Number} <: AbstractData
