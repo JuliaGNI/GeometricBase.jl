@@ -132,8 +132,8 @@ isperiodic(s::StateVariable) = any(periodic(s))
 
 zero(s::StateVariable) = StateVariable(zero(parent(s)), range(s), periodic(s))
 
-verifyrange(s::StateVariable) = BitArray(value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end] for i in eachindex(s))
-
+verifyrange(s::StateVariable, i) = value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end]
+verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
 
 struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
