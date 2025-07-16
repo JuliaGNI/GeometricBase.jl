@@ -23,25 +23,25 @@ function test_statevariable(Var, X, x)
     @test_nowarn X[4] = 42
 
     if ndims(x) > 1
-        @test X[1,1] == x[1,1]
-        @test X[2,3] == x[2,3]
-        @test X[3,2] == x[3,2]
-        @test X[begin,2] == x[begin,2]
-        @test X[2,end] == x[2,end]
-        @test X[:,2] == x[:,2]
-        @test X[2,:] == x[2,:]
-        @test X[:,:] == x[:,:]
+        @test X[1, 1] == x[1, 1]
+        @test X[2, 3] == x[2, 3]
+        @test X[3, 2] == x[3, 2]
+        @test X[begin, 2] == x[begin, 2]
+        @test X[2, end] == x[2, end]
+        @test X[:, 2] == x[:, 2]
+        @test X[2, :] == x[2, :]
+        @test X[:, :] == x[:, :]
 
-        @test x[1,1] == 23
+        @test x[1, 1] == 23
 
-        @test_nowarn X[2,2] = 42
-        @test x[2,2] == 42
+        @test_nowarn X[2, 2] = 42
+        @test x[2, 2] == 42
 
-        @test_nowarn X[:,3] .= 1
-        @test all(x[:,3] .== 1)
+        @test_nowarn X[:, 3] .= 1
+        @test all(x[:, 3] .== 1)
 
-        @test_nowarn X[3,:] .= 2
-        @test all(x[3,:] .== 2)
+        @test_nowarn X[3, :] .= 2
+        @test all(x[3, :] .== 2)
     end
 
     @test_nowarn X[:] .= 3
@@ -60,7 +60,7 @@ end
 
 @testset "$(rpad("Time Variable",80))" begin
 
-    t = 2.
+    t = 2.0
     T = TimeVariable(t)
     U = TimeVariable(2)
 
@@ -72,14 +72,14 @@ end
     @test parent(zero(T)) == zero(fill(t))
     @test zero(T) == TimeVariable(zero(fill(t)))
 
-    @test T + 2 === 4.
-    @test 2 + T === 4.
-    @test T - 2 === 0.
-    @test 2 - T === 0.
-    @test T * 3 === 6.
-    @test 3 * T === 6.
-    @test T / 2 === 1.
-    @test 2 / T === 1.
+    @test T + 2 === 4.0
+    @test 2 + T === 4.0
+    @test T - 2 === 0.0
+    @test 2 - T === 0.0
+    @test T * 3 === 6.0
+    @test 3 * T === 6.0
+    @test T / 2 === 1.0
+    @test 2 / T === 1.0
 
     @test U // 4 === 2 // 4
     @test 4 // U === 4 // 2
@@ -89,7 +89,7 @@ end
 
 @testset "$(rpad("State Variables",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
-        for DT in (Float32, Float64), inds in ((4,), (3,4))
+        for DT in (Float32, Float64), inds in ((4,), (3, 4))
             x = rand(DT, inds...)
             X = Var(x)
 
@@ -102,7 +102,7 @@ end
         end
     end
 
-    for DT in (Float32, Float64), inds in ((4,), (3,4))
+    for DT in (Float32, Float64), inds in ((4,), (3, 4))
         x = rand(DT, inds...)
         X = StateVariable(x)
 
@@ -116,12 +116,12 @@ end
         @test range(X, 3) == (range(X)[begin][3], range(X)[end][3])
         @test range(X, :) == (range(X)[begin][:], range(X)[end][:])
 
-        @test periodic(X, 3) == periodic(X)[3]
-        @test periodic(X, :) == periodic(X)[:]
+        @test isperiodic(X, 3) == periodic(X)[3]
+        @test isperiodic(X, :) == periodic(X)[:]
 
     end
 
-    X = StateVariable([0., 1., 2.], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
+    X = StateVariable([0.0, 1.0, 2.0], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
     @test verifyrange(X) == BitArray([true, true, false])
 end
 
@@ -134,7 +134,7 @@ end
         @test typeof(Var(ones(Float64, 3, 4))) <: AbstractStateVariable{Float64,2}
         @test typeof(Var(ones(Int, 3, 4))) <: AbstractStateVariable{Int,2}
 
-        for DT in (Float32, Float64), inds in ((4,), (3,4))
+        for DT in (Float32, Float64), inds in ((4,), (3, 4))
             x = rand(DT, inds...)
             y = rand(DT, inds...)
             X = Var(copy(x))
@@ -159,7 +159,7 @@ end
         @test typeof(Increment(Var(ones(Float64, 3, 4)))) <: AbstractStateVariable{Float64,2}
         @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int,2}
 
-        for DT in (Float32, Float64), inds in ((4,), (3,4))
+        for DT in (Float32, Float64), inds in ((4,), (3, 4))
             x = rand(DT, inds...)
             y = rand(DT, inds...)
             X = StateWithError(Var(x))
