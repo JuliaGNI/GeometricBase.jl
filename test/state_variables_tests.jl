@@ -72,17 +72,17 @@ end
     @test parent(zero(T)) == zero(fill(t))
     @test zero(T) == TimeVariable(zero(fill(t)))
 
-    @test T + 2 === 4.0
-    @test 2 + T === 4.0
-    @test T - 2 === 0.0
-    @test 2 - T === 0.0
-    @test T * 3 === 6.0
-    @test 3 * T === 6.0
-    @test T / 2 === 1.0
-    @test 2 / T === 1.0
+    @test T + 2 == fill(4.0)
+    @test 2 + T == fill(4.0)
+    @test T - 2 == fill(0.0)
+    @test 2 - T == fill(0.0)
+    @test T * 3 == fill(6.0)
+    @test 3 * T == fill(6.0)
+    @test T / 2 == fill(1.0)
+    @test 2 / T == fill(1.0)
 
-    @test U // 4 === 2 // 4
-    @test 4 // U === 4 // 2
+    @test U // 4 == fill(2 // 4)
+    @test 4 // U == fill(4 // 2)
 
 end
 

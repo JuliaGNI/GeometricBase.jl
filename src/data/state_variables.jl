@@ -81,16 +81,24 @@ function copy!(t::TimeVariable{DT}, y::DT) where {DT}
     parent(t) .= y
 end
 
-Base.:(+)(a::TimeVariable, b::Number) = value(a) + b
+Base.:(+)(a::TimeVariable) = a
+Base.:(+)(a::TimeVariable, b::Number) = TimeVariable(value(a) + b)
 Base.:(+)(a::Number, b::TimeVariable) = +(b, a)
-Base.:(-)(a::TimeVariable, b::Number) = value(a) - b
-Base.:(-)(a::Number, b::TimeVariable) = a - value(b)
-Base.:(*)(a::TimeVariable, b::Number) = value(a) * b
+Base.:(+)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) + value(b))
+Base.:(-)(a::TimeVariable) = TimeVariable(-value(a))
+Base.:(-)(a::TimeVariable, b::Number) = TimeVariable(value(a) - b)
+Base.:(-)(a::Number, b::TimeVariable) = TimeVariable(a - value(b))
+Base.:(-)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) - value(b))
+Base.:(*)(a::TimeVariable, b::Number) = TimeVariable(value(a) * b)
 Base.:(*)(a::Number, b::TimeVariable) = *(b, a)
-Base.:(/)(a::TimeVariable, b::Number) = value(a) / b
-Base.:(/)(a::Number, b::TimeVariable) = a / value(b)
-Base.:(//)(a::TimeVariable, b::Number) = value(a) // b
-Base.:(//)(a::Number, b::TimeVariable) = a // value(b)
+Base.:(*)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) * value(b))
+Base.:(/)(a::TimeVariable, b::Number) = TimeVariable(value(a) / b)
+Base.:(/)(a::Number, b::TimeVariable) = /(b, a)
+Base.:(/)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) / value(b))
+Base.:(//)(a::TimeVariable, b::Number) = TimeVariable(value(a) // b)
+Base.:(//)(a::Number, b::TimeVariable) = TimeVariable(a // value(b))
+Base.:(//)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) // value(b))
+Base.:(^)(a::TimeVariable, b::Number) = TimeVariable(value(a)^b)
 
 
 struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
