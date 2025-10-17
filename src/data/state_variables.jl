@@ -69,6 +69,7 @@ TimeVariable(x::TimeVariable) = TimeVariable(parent(x))
 TimeVariable(x::Number) = TimeVariable(fill(x))
 
 convert(::Type{<:TimeVariable}, x::Number) = TimeVariable(x)
+convert(::Type{<:Number}, x::TimeVariable) = value(x)
 
 parent(t::TimeVariable) = t.value
 value(t::TimeVariable) = parent(t)[1]
