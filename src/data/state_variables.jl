@@ -71,8 +71,8 @@ TimeVariable(x::Number) = TimeVariable(fill(x))
 parent(t::TimeVariable) = t.value
 value(t::TimeVariable) = parent(t)[1]
 
-Base.convert(::Type{<:TimeVariable}, x::Number) = TimeVariable(x)
-Base.convert(::Type{T}, x::TimeVariable) where {T<:Number} = T(value(x))
+Base.convert(::Type{<:TimeVariable{T}}, x::T) where {T<:Number} = TimeVariable(x)
+Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
 
 function add!(t::TimeVariable{DT}, Δs::DT) where {DT}
     parent(t) .+= Δs
