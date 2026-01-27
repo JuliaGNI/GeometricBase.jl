@@ -11,6 +11,7 @@ module GeometricBase
     include("abstract_integrator.jl")
     include("abstract_solution.jl")
     include("abstract_solver.jl")
+    include("abstract_solver_state.jl")
 
     include("data/system_types.jl")
     include("data/data_types.jl")
