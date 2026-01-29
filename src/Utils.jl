@@ -1,15 +1,15 @@
 module Utils
 
-    export @define, @big
+export @define, @big
 
-    include("utils/macros.jl")
+include("utils/macros.jl")
 
-    export compensated_summation, compensated_summation!
+export compensated_summation, compensated_summation!
 
-    include("utils/summation.jl")
+include("utils/summation.jl")
 
-    export L2norm, l2norm
+export L2norm, l2norm, maxnorm
 
-    include("utils/norms.jl")
+include("utils/norms.jl")
 
 end
