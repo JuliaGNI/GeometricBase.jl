@@ -8,9 +8,8 @@ function L2norm(x, y)
     mapreduce((xᵢ, yᵢ) -> (xᵢ - yᵢ)^2, +, x, y)
 end
 
-function l2norm(x...)
-    sqrt(L2norm(x...))
-end
+l2norm(x) = sqrt(L2norm(x))
+l2norm(x, y) = sqrt(L2norm(x, y))
 
 function maxnorm(x)
     local r² = zero(eltype(x))
