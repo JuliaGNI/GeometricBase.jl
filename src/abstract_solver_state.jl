@@ -1,5 +1,5 @@
 
-export AbstractSolverState, isAbstractSolverState
+export AbstractSolverState, isAbstractSolverState, SolverState
 
 """
     AbstractSolverState
@@ -10,3 +10,10 @@ abstract type AbstractSolverState end
 
 isAbstractSolverState(::Any) = false
 isAbstractSolverState(::AbstractSolverState) = true
+
+"""
+    SolverState
+
+This method returns a subtype of `AbstractSolverState` according to the `SolverMethod` and additional, required parameters that is passed to it.
+"""
+function SolverState end
