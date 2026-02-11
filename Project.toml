@@ -1,10 +1,14 @@
 name = "GeometricBase"
 uuid = "9a0b12b7-583b-4f04-aa1f-d8551b6addc9"
-authors = ["Michael Kraus"]
 version = "0.12.7"
+authors = ["Michael Kraus"]
+
+[deps]
+Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [compat]
-julia = "1.6"
+Unicode = "1.10"
+julia = "1.10"
 
 [extras]
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
