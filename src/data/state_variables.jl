@@ -5,7 +5,7 @@ export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVariableWithError, StateVector
 
 export isperiodic, parenttype, verifyrange
-export add!, reset!, periodic, value, vectorfield, zerovector
+export add!, reset!, periodic, value, zerovector
 
 
 """
@@ -29,6 +29,7 @@ Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
 """
 abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT,0} end
 
+Base.:(==)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) == value(y)
 Base.:(==)(x::AbstractScalarVariable, y::Number) = value(x) == y
 Base.:(==)(x::Number, y::AbstractScalarVariable) = y == x
 
