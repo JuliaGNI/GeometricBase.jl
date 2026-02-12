@@ -118,6 +118,13 @@ Return the keys of all the state variables in the `State`.
 Base.keys(st::State) = keys(state(st))
 
 """
+    haskey(st::State, s::Symbol)
+
+Checks if `s` is a valid state variable in the `State`.
+"""
+Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
+
+"""
     copy!(st::State, sol::NamedTuple)
 
 Copy the values from a `NamedTuple` `sol` to the `State` `st`.
