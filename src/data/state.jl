@@ -58,7 +58,7 @@ struct State{
     solution::solutionType
     vectorfield::vectorfieldType
 
-    function State(ics::NamedTuple)
+    function State(ics::NamedTuple; initialize=true)
         # create solution tupke for all variables in ics
         solution = NamedTuple{keys(ics)}(_state(x) for x in ics)
 
@@ -78,8 +78,8 @@ struct State{
         # create state
         state = new{typeof(state_fields),typeof(solution),typeof(vectorfield_filtered)}(state_fields, solution, vectorfield_filtered)
 
-        # copy initial conditions to state
-        copy!(state, ics)
+        # copy initial conditions to state if initialize == true
+        initialize && copy!(state, ics)
 
         return state
     end

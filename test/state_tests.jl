@@ -45,13 +45,26 @@ end
         λ=AlgebraicVariable(rand(2)),
     )
 
-    st = State(data)
+    st = State(data; initialize=false)
 
     @test state(st) == st.state
     @test solution(st) == st.solution
     @test vectorfield(st) == st.vectorfield
 
     @test keys(st) == keys(state(st))
+
+    # @test st.t ≠ data.t
+    @test st.q ≠ data.q
+    @test st.p ≠ data.p
+    @test st.λ ≠ data.λ
+
+    @test st.t == zero(data.t)
+    @test st.q == zero(data.q)
+    @test st.p == zero(data.p)
+    @test st.λ == zero(data.λ)
+
+
+    st = State(data)
 
     @test st.t == data.t
     @test st.q == data.q
