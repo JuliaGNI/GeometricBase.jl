@@ -80,12 +80,15 @@ value(t::TimeVariable) = parent(t)[1]
 Base.convert(::Type{<:TimeVariable{T}}, x::T) where {T<:Number} = TimeVariable(x)
 Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
 
-function add!(t::TimeVariable{DT}, Δs::DT) where {DT}
-    parent(t) .+= Δs
+Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::TimeVariable) = parent(a) .+= parent(b)
+Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::Number) = parent(a) .+= b
+
+function add!(t::TimeVariable{DT}, Δt::DT) where {DT}
+    t .+= Δt
 end
 
 function copy!(t::TimeVariable{DT}, y::DT) where {DT}
-    parent(t) .= y
+    t .= y
 end
 
 Base.:(+)(a::TimeVariable) = a

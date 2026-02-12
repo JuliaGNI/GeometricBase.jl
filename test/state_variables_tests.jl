@@ -84,6 +84,15 @@ end
     @test U // 4 == fill(2 // 4)
     @test 4 // U == fill(4 // 2)
 
+    T = TimeVariable(t)
+    U = TimeVariable(2)
+
+    T .+= U
+    U .+= 2
+
+    @test value(T) == 4.0
+    @test value(U) == 4
+
 end
 
 
