@@ -137,3 +137,13 @@ function Base.copy!(st::State, sol::NamedTuple)
 
     return st
 end
+
+function Base.copy!(st::State, x::State)
+    @assert keys(st) == keys(x)
+
+    for k in keys(st)
+        copy!(state(st)[k], state(x)[k])
+    end
+
+    return st
+end
