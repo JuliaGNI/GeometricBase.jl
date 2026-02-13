@@ -1,6 +1,6 @@
 using Unicode: normalize
 
-export State
+export HistoryState, State
 export solution, state, vectorfield
 
 
@@ -23,8 +23,8 @@ _vectorfield(x::StateWithError) = _vectorfield(x.state)
 # The `_convert` function returns an appropriate type for any given `AbstractVariable`.
 # In particular, it returns the scalar value of a `TimeVariable`.
 _convert(x::Missing)::Missing = x
-_convert(x::TimeVariable) = value(x)
 _convert(x::AbstractVariable) = x
+_convert(x::TimeVariable) = value(x)
 
 # Adds a dot or bar to a symbol, indicating a time derivative or vector field, or a previous solution.
 _add_symbol(s::Symbol, c::Char) = Symbol(normalize("$(s)$(c)"))
@@ -58,31 +58,35 @@ struct State{
     solution::solutionType
     vectorfield::vectorfieldType
 
-    function State(ics::NamedTuple; initialize=true)
-        # create solution tupke for all variables in ics
-        solution = NamedTuple{keys(ics)}(_state(x) for x in ics)
-
-        # create vectorfield vector for all state variables in ics
-        vectorfield = NamedTuple{keys(ics)}(_vectorfield(x) for x in ics)
-
-        # remove all fields that are missing, i.e., that correspond to a variable without vectorfield
-        vectorfield_filtered = NamedTuple{filter(k -> !all(ismissing.(vectorfield[k])), keys(vectorfield))}(vectorfield)
-
-        # create vector field symbols with dotted solution symbols
-        vectorfield_keys = Tuple(_add_dot(k) for k in keys(vectorfield_filtered))
-        vectorfield_dots = NamedTuple{vectorfield_keys}(values(vectorfield_filtered))
-
-        # create state by merging solution fields with filtered vector fields
-        state_fields = merge(solution, vectorfield_dots)
-
-        # create state
-        state = new{typeof(state_fields),typeof(solution),typeof(vectorfield_filtered)}(state_fields, solution, vectorfield_filtered)
-
-        # copy initial conditions to state if initialize == true
-        initialize && copy!(state, ics)
-
-        return state
+    function State(state, solution, vectorfield)
+        new{typeof(state),typeof(solution),typeof(vectorfield)}(state, solution, vectorfield)
     end
+end
+
+function State(ics::NamedTuple; initialize=true)
+    # create solution tuple for all variables in ics
+    solution = NamedTuple{keys(ics)}(_state(x) for x in ics)
+
+    # create vectorfield vector for all state variables in ics
+    vectorfield = NamedTuple{keys(ics)}(_vectorfield(x) for x in ics)
+
+    # remove all fields that are missing, i.e., that correspond to a variable without vectorfield
+    vectorfield_filtered = NamedTuple{filter(k -> !all(ismissing.(vectorfield[k])), keys(vectorfield))}(vectorfield)
+
+    # create vector field symbols with dotted solution symbols
+    vectorfield_keys = Tuple(_add_dot(k) for k in keys(vectorfield_filtered))
+    vectorfield_dots = NamedTuple{vectorfield_keys}(values(vectorfield_filtered))
+
+    # create state by merging solution fields with filtered vector fields
+    state_fields = merge(solution, vectorfield_dots)
+
+    # create state
+    state = State(state_fields, solution, vectorfield_filtered)
+
+    # copy initial conditions to state if initialize == true
+    initialize && copy!(state, ics)
+
+    return state
 end
 
 @inline function Base.hasproperty(::State{ST}, s::Symbol) where {ST}
@@ -105,10 +109,18 @@ end
     end
 end
 
-
 state(st::State) = st.state
 solution(st::State) = st.solution
 vectorfield(st::State) = st.vectorfield
+
+"""
+    getindex(st::State, args...)
+
+Passes `getindex` on to the state in `State`.
+"""
+Base.getindex(st::State, args...) = getindex(state(st), args...)
+Base.firstindex(st::State) = firstindex(state(st))
+Base.lastindex(st::State) = lastindex(state(st))
 
 """
     keys(st::State)
@@ -123,6 +135,13 @@ Base.keys(st::State) = keys(state(st))
 Checks if `s` is a valid state variable in the `State`.
 """
 Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
+
+Base.length(st::State) = length(state(st))
+
+function Base.iterate(st::State, i=1)
+    i > length(st) ? nothing : (state(st)[i], i + 1)
+end
+
 
 """
     copy!(st::State, sol::NamedTuple)
@@ -153,4 +172,30 @@ function Base.copy!(st::State, x::State)
     end
 
     return st
+end
+
+function Base.copy(oldstate::State)
+    newstate = State(solution(oldstate))
+    copy!(newstate, oldstate)
+    return newstate
+end
+
+
+"""
+    HistoryState(st::State)
+
+Constructs a state whose symbols are decorated by a bar to indicate a previous value of the state.
+"""
+function HistoryState(st::State)
+    # convert state
+    history_state = NamedTuple{_add_bar.(keys(state(st)))}(values(state(st)))
+
+    # convert solution
+    history_solution = NamedTuple{_add_bar.(keys(solution(st)))}(values(solution(st)))
+
+    # convert vectorfield
+    history_vectorfield = NamedTuple{_add_bar.(keys(vectorfield(st)))}(values(vectorfield(st)))
+
+    # create history state
+    State(history_state, history_solution, history_vectorfield)
 end
