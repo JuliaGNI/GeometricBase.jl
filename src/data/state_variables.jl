@@ -71,6 +71,10 @@ function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT,N,AT<:Abstra
     parent(s) .+= Δs
 end
 
+Base.:(≈)(x::AbstractStateVariable, y::AbstractStateVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
+Base.:(≈)(x::AbstractStateVariable, y::AbstractArray, args...; kwargs...) = ≈(parent(x), y, args...; kwargs...)
+Base.:(≈)(x::AbstractArray, y::AbstractStateVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
+
 
 struct TimeVariable{DT<:Number,AT<:AbstractArray{DT,0}} <: AbstractScalarVariable{DT}
     value::AT
