@@ -139,7 +139,7 @@ function Base.copy!(st::State, sol::NamedTuple)
     @assert keys(sol) ⊆ keys(st)
 
     for k in keys(sol)
-        copy!(solution(st)[k], sol[k])
+        copy!(state(st)[k], sol[k])
     end
 
     return st
