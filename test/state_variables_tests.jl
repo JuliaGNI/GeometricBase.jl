@@ -9,6 +9,7 @@ function test_statevariable(Var, X, x)
     @test size(X) == size(x)
     @test eachindex(X) == eachindex(x)
     @test parent(X) == x
+    @test parent(copy(X)) == x
     @test parent(zero(X)) == zero(x)
     @test zero(X) == Var(zero(x))
 
@@ -55,6 +56,23 @@ function test_statevariable(Var, X, x)
 
     @test_nowarn copy!(X, zero(parent(X)))
     @test all(x .== 0)
+
+    Y = copy(X)
+    @test X ≈ Y
+    @test Y ≈ X
+
+    Y .+= eps()
+    @test X ≈ Y atol = 16eps()
+    @test Y ≈ X atol = 16eps()
+
+    Z = copy(parent(X))
+    @test X ≈ Z
+    @test Z ≈ X
+
+    Z .+= eps()
+    @test X ≈ Z atol = 16eps()
+    @test Z ≈ X atol = 16eps()
+
 end
 
 
@@ -69,6 +87,7 @@ end
     @test parent(T) == fill(t)
     @test value(T) == t
 
+    @test parent(copy(T)) == parent(T)
     @test parent(zero(T)) == zero(fill(t))
     @test zero(T) == TimeVariable(zero(fill(t)))
 
@@ -92,6 +111,11 @@ end
 
     @test value(T) == 4.0
     @test value(U) == 4
+
+    @test T ≈ U
+    @test T ≈ 4.0
+    @test T ≈ 4.0 + eps()
+    @test 4.0 + eps() ≈ T
 
 end
 
@@ -128,6 +152,8 @@ end
         @test isperiodic(X, 3) == periodic(X)[3]
         @test isperiodic(X, :) == periodic(X)[:]
 
+        @test range(copy(X)) == range(X)
+        @test range(zero(X)) == range(X)
     end
 
     X = StateVariable([0.0, 1.0, 2.0], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
