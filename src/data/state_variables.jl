@@ -7,6 +7,9 @@ export Increment, StateWithError, StateVariableWithError, StateVector
 export isperiodic, parenttype, verifyrange
 export add!, reset!, periodic, value, zerovector
 
+isperiodic(::Number, args...) = false
+isperiodic(::AbstractArray, args...) = false
+
 
 """
 `AbstractVariable{T,N}` is a wrapper around a `AbstractArray{T,N}` that provides context for the nature of the variable.
@@ -20,11 +23,14 @@ getindex(a::AbstractVariable, ind...) = getindex(parent(a), ind...)
 setindex!(a::AbstractVariable, x, ind...) = setindex!(parent(a), x, ind...)
 zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
 
-isperiodic(t::AbstractVariable, args...) = false
-
-# ...
-
 Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
+Base.:(==)(x::AbstractVariable, y::AbstractArray) where {AV<:AbstractVariable} = parent(x) == y
+Base.:(==)(x::AbstractArray, y::AbstractVariable) where {AV<:AbstractVariable} = y == x
+
+Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
+Base.:(≈)(x::AbstractVariable, y::AbstractArray, args...; kwargs...) = ≈(parent(x), y, args...; kwargs...)
+Base.:(≈)(x::AbstractArray, y::AbstractVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
+
 
 """
 `AbstractScalarVariable{T}` is a wrapper around a zero-dimensional `AbstractArray{T,0}` that provides context for the nature of the variable, e.g., time.
@@ -70,10 +76,6 @@ function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT,N,AT<:Abstra
     @assert axes(s) == axes(Δs)
     parent(s) .+= Δs
 end
-
-Base.:(≈)(x::AbstractStateVariable, y::AbstractStateVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
-Base.:(≈)(x::AbstractStateVariable, y::AbstractArray, args...; kwargs...) = ≈(parent(x), y, args...; kwargs...)
-Base.:(≈)(x::AbstractArray, y::AbstractStateVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
 
 
 struct TimeVariable{DT<:Number,AT<:AbstractArray{DT,0}} <: AbstractScalarVariable{DT}
