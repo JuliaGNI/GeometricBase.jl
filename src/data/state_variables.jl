@@ -1,5 +1,5 @@
 
-import Base: axes, copy!, eachindex, getindex, parent, setindex!, size, zero
+import Base: axes, copy, copy!, eachindex, getindex, parent, setindex!, size, zero
 
 export TimeVariable, StateVariable, VectorfieldVariable, AlgebraicVariable
 export Increment, StateWithError, StateVariableWithError, StateVector
@@ -20,6 +20,8 @@ getindex(a::AbstractVariable, ind...) = getindex(parent(a), ind...)
 setindex!(a::AbstractVariable, x, ind...) = setindex!(parent(a), x, ind...)
 zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
 
+isperiodic(t::AbstractVariable, args...) = false
+
 # ...
 
 Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
@@ -37,6 +39,9 @@ Base.:(≠)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) ≠
 Base.:(≠)(x::AbstractScalarVariable, y::Number) = value(x) ≠ y
 Base.:(≠)(x::Number, y::AbstractScalarVariable) = y ≠ x
 
+Base.:(≈)(x::AbstractScalarVariable, y::AbstractScalarVariable, args...; kwargs...) = ≈(value(x), value(y), args...; kwargs...)
+Base.:(≈)(x::AbstractScalarVariable, y::Number, args...; kwargs...) = ≈(value(x), y, args...; kwargs...)
+Base.:(≈)(x::Number, y::AbstractScalarVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
 
 """
 `AbstractStateVariable{T,N,AT}` is a wrapper around a `AT <: AbstractArray{T,N}` that provides context for the nature of the variable, e.g., a state or a vector field.
@@ -83,13 +88,11 @@ Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::TimeVariable) = parent(a) .+= parent(b)
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::Number) = parent(a) .+= b
 
-function add!(t::TimeVariable{DT}, Δt::DT) where {DT}
-    t .+= Δt
-end
+add!(t::TimeVariable{DT}, Δt::DT) where {DT} = t .+= Δt
+copy!(t::TimeVariable{DT}, y::DT) where {DT} = t .= y
 
-function copy!(t::TimeVariable{DT}, y::DT) where {DT}
-    t .= y
-end
+zero(t::TimeVariable) = TimeVariable(zero(parent(t)))
+copy(t::TimeVariable) = TimeVariable(copy(parent(t)))
 
 Base.:(+)(a::TimeVariable) = a
 Base.:(+)(a::TimeVariable, b::Number) = TimeVariable(value(a) + b)
@@ -159,10 +162,12 @@ Base.eachindex(s::StateVariable) = eachindex(parent(s))
 isperiodic(s::StateVariable) = any(periodic(s))
 isperiodic(s::StateVariable, i) = periodic(s)[i]
 
+copy(s::StateVariable) = StateVariable(copy(parent(s)), range(s), periodic(s))
 zero(s::StateVariable) = StateVariable(zero(parent(s)), range(s), periodic(s))
 
 verifyrange(s::StateVariable, i) = value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end]
 verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
+
 
 struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
@@ -171,6 +176,10 @@ VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
 VectorfieldVariable(x::StateVariable) = VectorfieldVariable(zero(parent(x)))
 
 parent(v::VectorfieldVariable) = v.value
+
+copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
+zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
+
 
 struct AlgebraicVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
@@ -181,6 +190,10 @@ AlgebraicVariable(x::StateVariable) = AlgebraicVariable(zero(parent(x)))
 
 parent(a::AlgebraicVariable) = a.value
 
+copy(a::AlgebraicVariable) = AlgebraicVariable(copy(parent(a)))
+zero(a::AlgebraicVariable) = AlgebraicVariable(zero(parent(a)))
+
+
 struct Increment{DT,N,VT<:AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
     var::VT
 end
@@ -188,6 +201,9 @@ end
 Increment(x::Increment) = Increment(parent(x))
 
 parent(i::Increment) = i.var
+
+copy(i::Increment) = Increment(copy(parent(i)))
+zero(i::Increment) = Increment(zero(parent(i)))
 
 reset!(i::Increment) = parent(parent(i)) .= 0
 
@@ -226,6 +242,7 @@ struct StateWithError{DT,N,VT<:AbstractStateVariable{DT,N}} <: AbstractStateVari
 end
 
 parent(s::StateWithError) = parent(s.state)
+copy(s::StateWithError) = StateWithError(copy(s.state))
 zero(s::StateWithError) = StateWithError(zero(s.state))
 periodic(s::StateWithError, args...) = periodic(s.state, args...)
 isperiodic(s::StateWithError, args...) = isperiodic(s.state, args...)
