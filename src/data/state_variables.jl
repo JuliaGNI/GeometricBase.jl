@@ -16,6 +16,7 @@ isperiodic(::AbstractArray, args...) = false
 """
 abstract type AbstractVariable{DT,N} <: AbstractArray{DT,N} end
 
+value(a::AbstractVariable) = a
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
 size(a::AbstractVariable, ind...) = size(parent(a), ind...)
 eachindex(a::AbstractVariable) = eachindex(parent(a))
@@ -23,11 +24,13 @@ getindex(a::AbstractVariable, ind...) = getindex(parent(a), ind...)
 setindex!(a::AbstractVariable, x, ind...) = setindex!(parent(a), x, ind...)
 zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
 
-Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
-Base.:(==)(x::AbstractVariable, y::AbstractArray) where {AV<:AbstractVariable} = parent(x) == y
-Base.:(==)(x::AbstractArray, y::AbstractVariable) where {AV<:AbstractVariable} = y == x
+# Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
+Base.:(==)(x::AbstractVariable, y::AbstractVariable) = parent(x) == parent(y)
+Base.:(==)(x::AbstractVariable, y::AbstractArray) = parent(x) == y
+Base.:(==)(x::AbstractArray, y::AbstractVariable) = y == x
 
-Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
+# Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
+Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
 Base.:(≈)(x::AbstractVariable, y::AbstractArray, args...; kwargs...) = ≈(parent(x), y, args...; kwargs...)
 Base.:(≈)(x::AbstractArray, y::AbstractVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
 
@@ -153,14 +156,12 @@ StateVariable(value, ::NullPeriodicity) = StateVariable(value)
 StateVariable(s::StateVariable) = StateVariable(parent(s), range(s), periodic(s))
 StateVariable(s::StateVariable{DT,N,AT}, range::Tuple{AT,AT}) where {DT,N,AT<:AbstractArray{DT,N}} = StateVariable(parent(s), range)
 
-value(s::StateVariable) = s.value
 Base.range(s::StateVariable) = s.range
 periodic(s::StateVariable) = s.periodic
 
+parent(s::StateVariable) = s.value
 value(s::StateVariable, i) = s.value[i]
 Base.range(s::StateVariable, i) = (s.range[begin][i], s.range[end][i])
-
-parent(s::StateVariable) = value(s)
 
 Base.axes(s::StateVariable) = axes(parent(s))
 Base.eachindex(s::StateVariable) = eachindex(parent(s))
@@ -173,6 +174,8 @@ zero(s::StateVariable) = StateVariable(zero(parent(s)), range(s), periodic(s))
 
 verifyrange(s::StateVariable, i) = value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end]
 verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
+
+Base.:(==)(x::StateVariable, y::StateVariable) = parent(x) == parent(y) && range(x) == range(y) && periodic(x) == periodic(y)
 
 
 struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
@@ -255,6 +258,8 @@ isperiodic(s::StateWithError, args...) = isperiodic(s.state, args...)
 Base.range(s::StateWithError, args...) = range(s.state, args...)
 verifyrange(s::StateWithError, args...) = verifyrange(s.state, args...)
 
+Base.:(==)(x::StateWithError, y::StateWithError) = x.state == y.state && x.error == y.error
+
 const StateVariableWithError{DT,N,AT,RT,PT} = StateWithError{DT,N,StateVariable{DT,N,AT,RT,PT}} where {DT,N,AT,RT,PT}
 
 function copy!(dst::StateWithError{DT,N,VT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N},VT<:AbstractStateVariable{DT,N,AT}}
@@ -321,3 +326,4 @@ zerovector(X::ST) where {VT,ST<:StateVector{<:Number,VT}} = VT[zero(x) for x in 
 const TimeStep = Increment{<:TimeVariable}
 
 Base.:(+)(t::TimeVariable, Δt::TimeStep) = TimeVariable(value(t) + value(parent(Δt)))
+Base.broadcasted(::typeof(:(+)), t::TimeVariable, Δt::TimeStep) = parent(t) .+= parent(Δt)
