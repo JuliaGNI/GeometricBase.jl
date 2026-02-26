@@ -90,29 +90,6 @@ function State(ics::NamedTuple; initialize=true)
     return state
 end
 
-function Base.hasproperty(::State{ST}, s::Symbol) where {ST}
-    hasfield(ST, s) || hasfield(State, s)
-end
-
-function Base.getproperty(st::State{ST}, s::Symbol) where {ST}
-    if hasfield(ST, s)
-        return value(getfield(getfield(st, :state), s))
-    else
-        return getfield(st, s)
-    end
-end
-
-function Base.setproperty!(st::State{ST}, s::Symbol, x) where {ST}
-    if hasfield(ST, s)
-        return copy!(getfield(st, :state)[s], x)
-    else
-        return setfield!(st, s, x)
-    end
-end
-
-state(st::State) = st.state
-solution(st::State) = st.solution
-vectorfield(st::State) = st.vectorfield
 
 """
     keys(st::State)
@@ -124,7 +101,6 @@ Base.keys(::State{stT,solT,vecT,stKeys}) where {stT,solT,vecT,stKeys} = stKeys
 solutionkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
 vectorfieldkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
 
-
 """
     haskey(st::State, ::Val{s})
     haskey(st::State, s::Symbol)
@@ -135,13 +111,39 @@ Base.haskey(st::State, s::Val) = s ∈ keys(st)
 Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
 
 
+function Base.hasproperty(st::State, s::Symbol)
+    haskey(st, s) || hasfield(State, s)
+end
+
+function Base.getproperty(st::State, s::Symbol)
+    if haskey(st, s)
+        return value(getfield(st, :state)[s])
+    else
+        return getfield(st, s)
+    end
+end
+
+function Base.setproperty!(st::State, s::Symbol, x)
+    if haskey(st, s)
+        return copy!(getfield(st, :state)[s], x)
+    else
+        return setfield!(st, s, x)
+    end
+end
+
+state(st::State) = st.state
+solution(st::State) = st.solution
+vectorfield(st::State) = st.vectorfield
+variables(st::State) = values(state(st))
+
+
 """
     getindex(st::State, args...)
 
 Passes `getindex` on to the state in `State`.
 """
 Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
-Base.getindex(st::State, s::Symbol) = getindex(state(st), s)
+Base.getindex(st::State, s::Symbol) = getindex(st, Val(s))
 Base.getindex(st::State, i::Int) = getindex(st, keys(st)[i])
 
 Base.nextind(st::State, args...) = nextind(keys(st), args...)
@@ -151,16 +153,8 @@ Base.firstindex(st::State) = firstindex(keys(st))
 Base.lastindex(st::State) = lastindex(keys(st))
 
 Base.length(st::State) = length(keys(st))
-
 Base.iterate(st::State, i=1) = i > length(st) ? nothing : (st[i], i + 1)
-
-function Base.isnan(st::State)
-    havenan = false
-    for s in st
-        havenan = havenan || isnan(s)
-    end
-    return havenan
-end
+Base.isnan(st::State) = any(isnan, variables(st))
 
 
 """
@@ -178,20 +172,16 @@ function Base.copy!(st::State, sol::NamedTuple)
     @assert keys(sol) ⊆ keys(state(st))
 
     for k in keys(sol)
-        copy!(st[Val(k)], sol[k])
+        copy!(st[k], sol[k])
     end
 
     return st
 end
 
-function Base.copy!(st::State, x::State)
-    @assert keys(st) == keys(x)
-
-    for k in keys(st)
-        copy!(st[k], x[k])
-    end
-
-    return st
+function Base.copy!(dst::State, src::State)
+    @assert keys(dst) == keys(src)
+    map((x,y) -> copy!(x,y), variables(dst), variables(src))
+    return dst
 end
 
 function Base.copy(oldstate::State)

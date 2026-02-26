@@ -75,14 +75,13 @@ function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AT) where {DT,N,AT<:Abs
 end
 
 # This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
-function copy!(dst::AbstractStateVariable{DT,1,AT}, src::AT) where {DT,AT<:AbstractVector{DT}}
+function copy!(dst::AbstractStateVariable{DT,1,AT}, src::AT) where {DT,AT<:AbstractArray{DT,1}}
     @assert axes(dst) == axes(src)
     copy!(parent(dst), src)
 end
 
 function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AbstractStateVariable{DT,N,AT}) where {DT,N,AT<:AbstractArray{DT,N}}
-    @assert axes(dst) == axes(src)
-    copy!(parent(dst), parent(src))
+    copy!(dst, parent(src))
 end
 
 function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT,N,AT<:AbstractArray{DT,N}}
@@ -275,21 +274,19 @@ const StateVariableWithError{DT,N,AT,RT,PT} = StateWithError{DT,N,StateVariable{
 
 function copy!(dst::StateWithError{DT,N,VT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N},VT<:AbstractStateVariable{DT,N,AT}}
     @assert axes(dst) == axes(src)
-    copy!(dst.state, src)
-    dst.error .= 0
-end
-
-function copy!(dst::StateWithError{DT,N,VT}, src::VT) where {DT,N,VT<:AbstractStateVariable{DT,N}}
-    @assert axes(dst) == axes(src)
-    copy!(parent(dst), parent(src))
+    copy!(state(dst), src)
     dst.error .= 0
 end
 
 # This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
-function copy!(dst::StateWithError{DT,1,VT}, src::AT) where {DT,AT<:AbstractVector{DT},VT<:AbstractStateVariable{DT,1,AT}}
+function copy!(dst::StateWithError{DT,1,VT}, src::AT) where {DT,AT<:AbstractArray{DT,1},VT<:AbstractStateVariable{DT,1,AT}}
     @assert axes(dst) == axes(src)
     copy!(parent(dst), src)
     dst.error .= 0
+end
+
+function copy!(dst::StateWithError{DT,N,VT}, src::VT) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+    copy!(dst, parent(src))
 end
 
 function copy!(dst::StateWithError{DT,N,VT}, src::StateWithError{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
