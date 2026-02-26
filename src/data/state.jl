@@ -170,11 +170,7 @@ The keys of `sol` must be a subset of the keys of the state.
 """
 function Base.copy!(st::State, sol::NamedTuple)
     @assert keys(sol) ⊆ keys(state(st))
-
-    for k in keys(sol)
-        copy!(st[k], sol[k])
-    end
-
+    map(k -> copy!(st[k], sol[k]), keys(sol))
     return st
 end
 
