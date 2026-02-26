@@ -22,7 +22,7 @@ _vectorfield(x::StateWithError) = _vectorfield(x.state)
 
 # The `_convert` function returns an appropriate type for any given `AbstractVariable`.
 # In particular, it returns the scalar value of a `TimeVariable`.
-_convert(x::Missing)::Missing = x
+_convert(x::Missing) = x
 _convert(x::AbstractVariable) = x
 _convert(x::TimeVariable) = value(x)
 
@@ -65,16 +65,16 @@ end
 
 function State(ics::NamedTuple; initialize=true)
     # create solution tuple for all variables in ics
-    solution = NamedTuple{keys(ics)}(_state(x) for x in ics)
+    solution = map(x -> _state(x), ics)
 
     # create vectorfield vector for all state variables in ics
-    vectorfield = NamedTuple{keys(ics)}(_vectorfield(x) for x in ics)
+    vectorfield = map(x -> _vectorfield(x), ics)
 
     # remove all fields that are missing, i.e., that correspond to a variable without vectorfield
     vectorfield_filtered = NamedTuple{filter(k -> !all(ismissing.(vectorfield[k])), keys(vectorfield))}(vectorfield)
 
     # create vector field symbols with dotted solution symbols
-    vectorfield_keys = Tuple(_add_dot(k) for k in keys(vectorfield_filtered))
+    vectorfield_keys = map(k -> _add_dot(k), keys(vectorfield_filtered))
     vectorfield_dots = NamedTuple{vectorfield_keys}(values(vectorfield_filtered))
 
     # create state by merging solution fields with filtered vector fields
@@ -89,19 +89,19 @@ function State(ics::NamedTuple; initialize=true)
     return state
 end
 
-@inline function Base.hasproperty(::State{ST}, s::Symbol) where {ST}
+function Base.hasproperty(::State{ST}, s::Symbol) where {ST}
     hasfield(ST, s) || hasfield(State, s)
 end
 
-@inline function Base.getproperty(st::State{ST}, s::Symbol) where {ST}
+function Base.getproperty(st::State{ST}, s::Symbol) where {ST}
     if hasfield(ST, s)
-        return _convert(getfield(st, :state)[s])
+        return _convert(getfield(getfield(st, :state), s))
     else
         return getfield(st, s)
     end
 end
 
-@inline function Base.setproperty!(st::State{ST}, s::Symbol, x) where {ST}
+function Base.setproperty!(st::State{ST}, s::Symbol, x) where {ST}
     if hasfield(ST, s)
         return copy!(getfield(st, :state)[s], x)
     else
@@ -118,9 +118,16 @@ vectorfield(st::State) = st.vectorfield
 
 Passes `getindex` on to the state in `State`.
 """
-Base.getindex(st::State, args...) = getindex(state(st), args...)
+Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
+# Base.getindex(st::State, s::Symbol) = getindex(st, Val(s))
+
+# Base.getindex(st::State, args...) = getindex(state(st), args...)
+Base.nextind(st::State, args...) = nextind(state(st), args...)
+Base.prevind(st::State, args...) = prevind(state(st), args...)
+Base.eachindex(st::State) = eachindex(state(st))
 Base.firstindex(st::State) = firstindex(state(st))
 Base.lastindex(st::State) = lastindex(state(st))
+Base.length(st::State) = length(state(st))
 
 """
     keys(st::State)
@@ -136,11 +143,11 @@ Checks if `s` is a valid state variable in the `State`.
 """
 Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
 
-Base.length(st::State) = length(state(st))
+Base.in(st::State, args...) = in(state(st), args...)
 
-function Base.iterate(st::State, i=1)
-    i > length(st) ? nothing : (state(st)[i], i + 1)
-end
+Base.contains(st::State, args...) = contains(state(st), args...)
+
+Base.iterate(st::State, args...) = iterate(state(st), args...)
 
 
 """
@@ -158,7 +165,7 @@ function Base.copy!(st::State, sol::NamedTuple)
     @assert keys(sol) ⊆ keys(st)
 
     for k in keys(sol)
-        copy!(state(st)[k], sol[k])
+        copy!(st[Val(k)], sol[k])
     end
 
     return st
@@ -168,7 +175,7 @@ function Base.copy!(st::State, x::State)
     @assert keys(st) == keys(x)
 
     for k in keys(st)
-        copy!(state(st)[k], state(x)[k])
+        copy!(st[Val(k)], x[Val(k)])
     end
 
     return st

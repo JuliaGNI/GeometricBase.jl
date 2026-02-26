@@ -3,7 +3,8 @@ using Test
 
 using GeometricBase: StateWithError, TimeVariable, VectorfieldVariable
 using GeometricBase: periodic, value
-using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot, _state, _vectorfield
+using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot
+using GeometricBase: _convert, _state, _vectorfield
 
 
 @testset "$(rpad("State Helper Functions",80))" begin
@@ -24,6 +25,9 @@ using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_ba
 
     @test _state(TimeVariable(1.0)) == TimeVariable(0.0)
     @test _state(StateVariable(x)) == StateWithError(StateVariable(zero(x)))
+
+    @test _convert(TimeVariable(1.0)) == 1.0
+    @test _convert(StateVariable(x)) == StateVariable(x)
 
     # @test ismissing(_vectorfield(1))
     @test ismissing(_vectorfield(TimeVariable(1.0)))
@@ -51,7 +55,38 @@ end
     @test solution(st) == st.solution
     @test vectorfield(st) == st.vectorfield
 
+    @test eachindex(st) == eachindex(state(st))
+    @test iterate(st) == iterate(state(st))
     @test keys(st) == keys(state(st))
+
+
+    @inferred state(st)
+    @inferred solution(st)
+    @inferred vectorfield(st)
+
+    @inferred eachindex(st)
+    @inferred iterate(st)
+    @inferred keys(st)
+
+    test_t(state) = state.t
+    test_q(state) = state.q
+    test_p(state) = state.p
+
+    @inferred test_t(st)
+    @inferred test_q(st)
+    @inferred test_p(st)
+
+    # test_symbol(state, s) = state[Val(s)]
+    test_symbol(state, s) = state[s]
+
+    # @inferred test_symbol(st, :t)
+    # @inferred test_symbol(st, :q)
+    # @inferred test_symbol(st, :p)
+
+    @inferred test_symbol(st, Val(:t))
+    @inferred test_symbol(st, Val(:q))
+    @inferred test_symbol(st, Val(:p))
+
 
     # @test st.t ≠ data.t
     @test st.q ≠ data.q
@@ -64,7 +99,7 @@ end
     @test st.λ == zero(data.λ)
 
 
-    st = State(data)
+    st = State(data; initialize=true)
 
     @test st.t == data.t
     @test st.q == data.q
@@ -101,5 +136,18 @@ end
     @test :q ∈ keys(vectorfield(st))
     @test :p ∈ keys(vectorfield(st))
     @test :λ ∉ keys(vectorfield(st))
+
+
+    cst = copy(st)
+
+    @test cst.t == st.t
+    @test cst.q == st.q
+    @test cst.p == st.p
+    @test cst.λ == st.λ
+
+    @test keys(cst) == keys(st)
+    @test state(cst) == state(st)
+    @test solution(cst) == solution(st)
+    @test vectorfield(cst) == vectorfield(st)
 
 end
