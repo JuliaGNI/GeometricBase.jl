@@ -126,11 +126,12 @@ vectorfieldkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,v
 
 
 """
+    haskey(st::State, ::Val{s})
     haskey(st::State, s::Symbol)
 
 Checks if `s` is a valid state variable in the `State`.
 """
-Base.haskey(st::State, ::Val{s}) where {s} = s ∈ keys(st)
+Base.haskey(st::State, s::Val) = s ∈ keys(st)
 Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
 
 

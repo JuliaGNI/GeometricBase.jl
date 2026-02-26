@@ -120,6 +120,20 @@ end
     @test hasproperty(st, :q̇)
     @test hasproperty(st, :ṗ)
 
+    @test haskey(st, Val(:t))
+    @test haskey(st, Val(:q))
+    @test haskey(st, Val(:p))
+    @test haskey(st, Val(:λ))
+    @test haskey(st, Val(:q̇))
+    @test haskey(st, Val(:ṗ))
+
+    @test haskey(st, :t)
+    @test haskey(st, :q)
+    @test haskey(st, :p)
+    @test haskey(st, :λ)
+    @test haskey(st, :q̇)
+    @test haskey(st, :ṗ)
+
     @test Val(:t) ∈ keys(st)
     @test Val(:q) ∈ keys(st)
     @test Val(:p) ∈ keys(st)
