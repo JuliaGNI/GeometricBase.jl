@@ -139,12 +139,14 @@ end
         x = rand(DT, inds...)
         X = StateVariable(x)
 
-        @test axes(X) == axes(value(X))
+        @test axes(X) == axes(parent(X))
         @test axes(X) == axes(range(X)[begin]) == axes(range(X)[end])
         @test axes(X) == axes(periodic(X))
 
-        @test value(X, 3) == value(X)[3]
-        @test value(X, :) == value(X)[:]
+        @test value(X) === X
+
+        @test value(X, 3) == parent(X)[3]
+        @test value(X, :) == parent(X)[:]
 
         @test range(X, 3) == (range(X)[begin][3], range(X)[end][3])
         @test range(X, :) == (range(X)[begin][:], range(X)[end][:])

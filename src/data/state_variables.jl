@@ -16,7 +16,12 @@ isperiodic(::AbstractArray, args...) = false
 """
 abstract type AbstractVariable{DT,N} <: AbstractArray{DT,N} end
 
+# The `value` function returns a processable value for any given `AbstractVariable`.
+# In most cases, this is just the variable itself, but for an `AbstractScalarVariable`
+# it is the scalar value stored in the 0d array (see `TimeVariable` for more details).
 value(a::AbstractVariable) = a
+value(x::Missing) = x
+
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
 size(a::AbstractVariable, ind...) = size(parent(a), ind...)
 eachindex(a::AbstractVariable) = eachindex(parent(a))
@@ -250,7 +255,8 @@ struct StateWithError{DT,N,VT<:AbstractStateVariable{DT,N}} <: AbstractStateVari
     end
 end
 
-parent(s::StateWithError) = parent(s.state)
+state(s::StateWithError) = s.state
+parent(s::StateWithError) = parent(state(s))
 copy(s::StateWithError) = StateWithError(copy(s.state))
 zero(s::StateWithError) = StateWithError(zero(s.state))
 periodic(s::StateWithError, args...) = periodic(s.state, args...)

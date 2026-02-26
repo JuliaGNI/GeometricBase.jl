@@ -18,13 +18,7 @@ _vectorfield(x::TimeVariable) = missing
 _vectorfield(x::StateVariable) = VectorfieldVariable(x)
 _vectorfield(x::VectorfieldVariable) = missing
 _vectorfield(x::AlgebraicVariable) = missing
-_vectorfield(x::StateWithError) = _vectorfield(x.state)
-
-# The `_convert` function returns an appropriate type for any given `AbstractVariable`.
-# In particular, it returns the scalar value of a `TimeVariable`.
-_convert(x::Missing) = x
-_convert(x::AbstractVariable) = x
-_convert(x::TimeVariable) = value(x)
+_vectorfield(x::StateWithError) = _vectorfield(state(x))
 
 # Adds a dot or bar to a symbol, indicating a time derivative or vector field, or a previous solution.
 _add_symbol(s::Symbol, c::Char) = Symbol(normalize("$(s)$(c)"))
@@ -51,7 +45,10 @@ in particular all state variables and their corresponding vector fields.
 struct State{
     stateType<:NamedTuple,
     solutionType<:NamedTuple,
-    vectorfieldType<:NamedTuple
+    vectorfieldType<:NamedTuple,
+    stateKeys,
+    solutionKeys,
+    vectorfieldKeys
 }
 
     state::stateType
@@ -59,7 +56,11 @@ struct State{
     vectorfield::vectorfieldType
 
     function State(state, solution, vectorfield)
-        new{typeof(state),typeof(solution),typeof(vectorfield)}(state, solution, vectorfield)
+        stateKeys = Val.(keys(state))
+        solutionKeys = Val.(keys(solution))
+        vectorfieldKeys = Val.(keys(vectorfield))
+
+        new{typeof(state),typeof(solution),typeof(vectorfield),stateKeys,solutionKeys,vectorfieldKeys}(state, solution, vectorfield)
     end
 end
 
@@ -95,7 +96,7 @@ end
 
 function Base.getproperty(st::State{ST}, s::Symbol) where {ST}
     if hasfield(ST, s)
-        return _convert(getfield(getfield(st, :state), s))
+        return value(getfield(getfield(st, :state), s))
     else
         return getfield(st, s)
     end
@@ -114,40 +115,43 @@ solution(st::State) = st.solution
 vectorfield(st::State) = st.vectorfield
 
 """
-    getindex(st::State, args...)
-
-Passes `getindex` on to the state in `State`.
-"""
-Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
-# Base.getindex(st::State, s::Symbol) = getindex(st, Val(s))
-
-# Base.getindex(st::State, args...) = getindex(state(st), args...)
-Base.nextind(st::State, args...) = nextind(state(st), args...)
-Base.prevind(st::State, args...) = prevind(state(st), args...)
-Base.eachindex(st::State) = eachindex(state(st))
-Base.firstindex(st::State) = firstindex(state(st))
-Base.lastindex(st::State) = lastindex(state(st))
-Base.length(st::State) = length(state(st))
-
-"""
     keys(st::State)
 
 Return the keys of all the state variables in the `State`.
 """
-Base.keys(st::State) = keys(state(st))
+Base.keys(st::State{stT,solT,vecT,stKeys}) where {stT,solT,vecT,stKeys} = stKeys
+
+solutionkeys(st::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
+vectorfieldkeys(st::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
+
 
 """
     haskey(st::State, s::Symbol)
 
 Checks if `s` is a valid state variable in the `State`.
 """
-Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
+Base.haskey(st::State, ::Val{s}) where {s} = s ∈ keys(st)
+Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
 
-Base.in(st::State, args...) = in(state(st), args...)
 
-Base.contains(st::State, args...) = contains(state(st), args...)
+"""
+    getindex(st::State, args...)
 
-Base.iterate(st::State, args...) = iterate(state(st), args...)
+Passes `getindex` on to the state in `State`.
+"""
+Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
+Base.getindex(st::State, s::Symbol) = getindex(state(st), s)
+Base.getindex(st::State, i::Int) = getindex(state(st), keys(st)[i])
+
+Base.nextind(st::State, args...) = nextind(keys(st), args...)
+Base.prevind(st::State, args...) = prevind(keys(st), args...)
+Base.eachindex(st::State) = eachindex(keys(st))
+Base.firstindex(st::State) = firstindex(keys(st))
+Base.lastindex(st::State) = lastindex(keys(st))
+
+Base.length(st::State) = length(keys(st))
+
+Base.iterate(st::State, i=0) = i > length(st) ? nothing : (st, i + 1)
 
 
 """
@@ -162,7 +166,7 @@ The keys of `sol` must be a subset of the keys of the state.
 - `sol`: the named tuple containing the solution values to copy
 """
 function Base.copy!(st::State, sol::NamedTuple)
-    @assert keys(sol) ⊆ keys(st)
+    @assert keys(sol) ⊆ keys(state(st))
 
     for k in keys(sol)
         copy!(st[Val(k)], sol[k])
@@ -175,7 +179,7 @@ function Base.copy!(st::State, x::State)
     @assert keys(st) == keys(x)
 
     for k in keys(st)
-        copy!(st[Val(k)], x[Val(k)])
+        copy!(st[k], x[k])
     end
 
     return st

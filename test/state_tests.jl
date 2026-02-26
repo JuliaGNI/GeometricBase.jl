@@ -2,9 +2,9 @@ using GeometricBase
 using Test
 
 using GeometricBase: StateWithError, TimeVariable, VectorfieldVariable
-using GeometricBase: periodic, value
+using GeometricBase: periodic, value, solutionkeys, vectorfieldkeys
 using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot
-using GeometricBase: _convert, _state, _vectorfield
+using GeometricBase: _state, _vectorfield
 
 
 @testset "$(rpad("State Helper Functions",80))" begin
@@ -25,9 +25,6 @@ using GeometricBase: _convert, _state, _vectorfield
 
     @test _state(TimeVariable(1.0)) == TimeVariable(0.0)
     @test _state(StateVariable(x)) == StateWithError(StateVariable(zero(x)))
-
-    @test _convert(TimeVariable(1.0)) == 1.0
-    @test _convert(StateVariable(x)) == StateVariable(x)
 
     # @test ismissing(_vectorfield(1))
     @test ismissing(_vectorfield(TimeVariable(1.0)))
@@ -55,9 +52,19 @@ end
     @test solution(st) == st.solution
     @test vectorfield(st) == st.vectorfield
 
-    @test eachindex(st) == eachindex(state(st))
-    @test iterate(st) == iterate(state(st))
-    @test keys(st) == keys(state(st))
+    @test eachindex(st) == 1:length(st)
+    @test firstindex(st) == 1
+    @test lastindex(st) == length(st)
+    @test nextind(st, 1) == 2
+    @test prevind(st, 2) == 1
+
+    @test keys(st) == Val.(keys(state(st)))
+    @test solutionkeys(st) == Val.(keys(solution(st)))
+    @test vectorfieldkeys(st) == Val.(keys(vectorfield(st)))
+
+    @test iterate(st) == (st, 1)
+    @test iterate(st, 1) == (st, 2)
+    @test iterate(st, 8) === nothing
 
 
     @inferred state(st)
@@ -113,12 +120,12 @@ end
     @test hasproperty(st, :q̇)
     @test hasproperty(st, :ṗ)
 
-    @test :t ∈ keys(st)
-    @test :q ∈ keys(st)
-    @test :p ∈ keys(st)
-    @test :λ ∈ keys(st)
-    @test :q̇ ∈ keys(st)
-    @test :ṗ ∈ keys(st)
+    @test Val(:t) ∈ keys(st)
+    @test Val(:q) ∈ keys(st)
+    @test Val(:p) ∈ keys(st)
+    @test Val(:λ) ∈ keys(st)
+    @test Val(:q̇) ∈ keys(st)
+    @test Val(:ṗ) ∈ keys(st)
 
     @test :t ∈ keys(state(st))
     @test :q ∈ keys(state(st))
@@ -126,6 +133,11 @@ end
     @test :λ ∈ keys(state(st))
     @test :q̇ ∈ keys(state(st))
     @test :ṗ ∈ keys(state(st))
+
+    @test Val(:t) ∈ solutionkeys(st)
+    @test Val(:q) ∈ solutionkeys(st)
+    @test Val(:p) ∈ solutionkeys(st)
+    @test Val(:λ) ∈ solutionkeys(st)
 
     @test :t ∈ keys(solution(st))
     @test :q ∈ keys(solution(st))
@@ -137,6 +149,11 @@ end
     @test :p ∈ keys(vectorfield(st))
     @test :λ ∉ keys(vectorfield(st))
 
+    @test Val(:t) ∉ vectorfieldkeys(st)
+    @test Val(:q) ∈ vectorfieldkeys(st)
+    @test Val(:p) ∈ vectorfieldkeys(st)
+    @test Val(:λ) ∉ vectorfieldkeys(st)
+
 
     cst = copy(st)
 
@@ -146,6 +163,9 @@ end
     @test cst.λ == st.λ
 
     @test keys(cst) == keys(st)
+    @test solutionkeys(cst) == solutionkeys(st)
+    @test vectorfieldkeys(cst) == vectorfieldkeys(st)
+
     @test state(cst) == state(st)
     @test solution(cst) == solution(st)
     @test vectorfield(cst) == vectorfield(st)
