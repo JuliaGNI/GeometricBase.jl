@@ -119,10 +119,10 @@ vectorfield(st::State) = st.vectorfield
 
 Return the keys of all the state variables in the `State`.
 """
-Base.keys(st::State{stT,solT,vecT,stKeys}) where {stT,solT,vecT,stKeys} = stKeys
+Base.keys(::State{stT,solT,vecT,stKeys}) where {stT,solT,vecT,stKeys} = stKeys
 
-solutionkeys(st::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
-vectorfieldkeys(st::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
+solutionkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
+vectorfieldkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
 
 
 """
