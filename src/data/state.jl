@@ -154,7 +154,7 @@ Base.lastindex(st::State) = lastindex(keys(st))
 
 Base.length(st::State) = length(keys(st))
 Base.iterate(st::State, i=1) = i > length(st) ? nothing : (st[i], i + 1)
-Base.isnan(st::State) = any(isnan, variables(st))
+Base.isnan(st::State) = mapfoldl(isnan, |, variables(st))
 
 
 """
