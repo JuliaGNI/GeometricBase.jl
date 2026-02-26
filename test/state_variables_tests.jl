@@ -12,6 +12,7 @@ function test_statevariable(Var, X, x)
     @test parent(copy(X)) == x
     @test parent(zero(X)) == zero(x)
     @test zero(X) == Var(zero(x))
+    @test isnan(X) == false
 
     @test X[1] == x[1]
     @test X[2] == x[2]
@@ -160,6 +161,10 @@ end
 
     X = StateVariable([0.0, 1.0, 2.0], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
     @test verifyrange(X) == BitArray([true, true, false])
+
+    Y = StateVariable([0.0, NaN, 2.0], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
+    @test isnan(Y)
+
 end
 
 

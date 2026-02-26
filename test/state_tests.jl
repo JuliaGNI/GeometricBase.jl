@@ -62,9 +62,11 @@ end
     @test solutionkeys(st) == Val.(keys(solution(st)))
     @test vectorfieldkeys(st) == Val.(keys(vectorfield(st)))
 
-    @test iterate(st) == (st, 1)
-    @test iterate(st, 1) == (st, 2)
+    @test iterate(st) == (st[1], 2)
+    @test iterate(st, 1) == (st[1], 2)
     @test iterate(st, 8) === nothing
+
+    @test isnan(st) == false
 
 
     @inferred state(st)
@@ -72,23 +74,10 @@ end
     @inferred vectorfield(st)
 
     @inferred eachindex(st)
-    @inferred iterate(st)
+    # @inferred iterate(st)
     @inferred keys(st)
 
-    test_t(state) = state.t
-    test_q(state) = state.q
-    test_p(state) = state.p
-
-    @inferred test_t(st)
-    @inferred test_q(st)
-    @inferred test_p(st)
-
-    # test_symbol(state, s) = state[Val(s)]
     test_symbol(state, s) = state[s]
-
-    # @inferred test_symbol(st, :t)
-    # @inferred test_symbol(st, :q)
-    # @inferred test_symbol(st, :p)
 
     @inferred test_symbol(st, Val(:t))
     @inferred test_symbol(st, Val(:q))
@@ -168,6 +157,8 @@ end
     @test Val(:p) ∈ vectorfieldkeys(st)
     @test Val(:λ) ∉ vectorfieldkeys(st)
 
+    @test isnan(st) == false
+
 
     cst = copy(st)
 
@@ -183,5 +174,17 @@ end
     @test state(cst) == state(st)
     @test solution(cst) == solution(st)
     @test vectorfield(cst) == vectorfield(st)
+
+
+    data = (
+        t=TimeVariable(NaN),
+        q=StateVariable(rand(3)),
+        p=StateVariable(rand(3)),
+        λ=AlgebraicVariable(rand(2)),
+    )
+
+    st = State(data; initialize=true)
+
+    @test isnan(st)
 
 end

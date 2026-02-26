@@ -142,7 +142,7 @@ Passes `getindex` on to the state in `State`.
 """
 Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
 Base.getindex(st::State, s::Symbol) = getindex(state(st), s)
-Base.getindex(st::State, i::Int) = getindex(state(st), keys(st)[i])
+Base.getindex(st::State, i::Int) = getindex(st, keys(st)[i])
 
 Base.nextind(st::State, args...) = nextind(keys(st), args...)
 Base.prevind(st::State, args...) = prevind(keys(st), args...)
@@ -152,7 +152,15 @@ Base.lastindex(st::State) = lastindex(keys(st))
 
 Base.length(st::State) = length(keys(st))
 
-Base.iterate(st::State, i=0) = i > length(st) ? nothing : (st, i + 1)
+Base.iterate(st::State, i=1) = i > length(st) ? nothing : (st[i], i + 1)
+
+function Base.isnan(st::State)
+    havenan = false
+    for s in st
+        havenan = havenan || isnan(s)
+    end
+    return havenan
+end
 
 
 """
