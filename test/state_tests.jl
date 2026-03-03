@@ -39,14 +39,15 @@ end
 
 @testset "$(rpad("State Constructor and Access Functions",80))" begin
 
+    initialtime = 1.0
+
     data = (
-        t=TimeVariable(0.0),
         q=StateVariable(rand(3)),
         p=StateVariable(rand(3)),
         λ=AlgebraicVariable(rand(2)),
     )
 
-    st = State(data; initialize=false)
+    st = State(initialtime, data; initialize=false)
 
     @test state(st) == st.state
     @test solution(st) == st.solution
@@ -79,25 +80,23 @@ end
 
     test_symbol(state, s) = state[s]
 
-    @inferred test_symbol(st, Val(:t))
     @inferred test_symbol(st, Val(:q))
     @inferred test_symbol(st, Val(:p))
 
 
-    # @test st.t ≠ data.t
     @test st.q ≠ data.q
     @test st.p ≠ data.p
     @test st.λ ≠ data.λ
 
-    @test st.t == zero(data.t)
+    @test st.t == zero(initialtime)
     @test st.q == zero(data.q)
     @test st.p == zero(data.p)
     @test st.λ == zero(data.λ)
 
 
-    st = State(data; initialize=true)
+    st = State(initialtime, data; initialize=true)
 
-    @test st.t == data.t
+    @test st.t == initialtime
     @test st.q == data.q
     @test st.p == data.p
     @test st.λ == data.λ
@@ -109,40 +108,36 @@ end
     @test hasproperty(st, :q̇)
     @test hasproperty(st, :ṗ)
 
-    @test haskey(st, Val(:t))
     @test haskey(st, Val(:q))
     @test haskey(st, Val(:p))
     @test haskey(st, Val(:λ))
     @test haskey(st, Val(:q̇))
     @test haskey(st, Val(:ṗ))
 
-    @test haskey(st, :t)
     @test haskey(st, :q)
     @test haskey(st, :p)
     @test haskey(st, :λ)
     @test haskey(st, :q̇)
     @test haskey(st, :ṗ)
 
-    @test Val(:t) ∈ keys(st)
     @test Val(:q) ∈ keys(st)
     @test Val(:p) ∈ keys(st)
     @test Val(:λ) ∈ keys(st)
     @test Val(:q̇) ∈ keys(st)
     @test Val(:ṗ) ∈ keys(st)
 
-    @test :t ∈ keys(state(st))
     @test :q ∈ keys(state(st))
     @test :p ∈ keys(state(st))
     @test :λ ∈ keys(state(st))
     @test :q̇ ∈ keys(state(st))
     @test :ṗ ∈ keys(state(st))
 
-    @test Val(:t) ∈ solutionkeys(st)
+    @test Val(:t) ∉ solutionkeys(st)
     @test Val(:q) ∈ solutionkeys(st)
     @test Val(:p) ∈ solutionkeys(st)
     @test Val(:λ) ∈ solutionkeys(st)
 
-    @test :t ∈ keys(solution(st))
+    @test :t ∉ keys(solution(st))
     @test :q ∈ keys(solution(st))
     @test :p ∈ keys(solution(st))
     @test :λ ∈ keys(solution(st))
@@ -177,13 +172,12 @@ end
 
 
     data = (
-        t=TimeVariable(NaN),
-        q=StateVariable(rand(3)),
+        q=StateVariable([1.0, NaN, 2.0]),
         p=StateVariable(rand(3)),
         λ=AlgebraicVariable(rand(2)),
     )
 
-    st = State(data; initialize=true)
+    st = State(initialtime, data; initialize=true)
 
     @test isnan(st)
 

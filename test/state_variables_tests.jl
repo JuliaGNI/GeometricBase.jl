@@ -144,8 +144,6 @@ end
         @test axes(X) == axes(range(X)[begin]) == axes(range(X)[end])
         @test axes(X) == axes(periodic(X))
 
-        @test value(X) === X
-
         @test value(X, 3) == parent(X)[3]
         @test value(X, :) == parent(X)[:]
 

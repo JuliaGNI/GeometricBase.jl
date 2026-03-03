@@ -18,13 +18,6 @@ abstract type AbstractVariable{DT,N} <: AbstractArray{DT,N} end
 
 parent(::AV) where {AV<:AbstractVariable} = error("parent() method not implemented for abstract variable ", AV)
 
-
-# The `value` function returns a processable value for any given `AbstractVariable`.
-# In most cases, this is just the variable itself, but for an `AbstractScalarVariable`
-# it is the scalar value stored in the 0d array (see `TimeVariable` for more details).
-value(a::AbstractVariable) = a
-value(x::Missing) = x
-
 isnan(a::AbstractVariable) = any(isnan, parent(a))
 
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
