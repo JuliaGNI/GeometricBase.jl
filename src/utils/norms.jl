@@ -5,7 +5,7 @@ end
 
 function L2norm(x, y)
     @assert axes(x) == axes(y)
-    mapreduce((xᵢ, yᵢ) -> (xᵢ - yᵢ)^2, +, x, y)
+    mapfoldl(z -> (z[1] - z[2])^2, +, zip(x, y))
 end
 
 l2norm(x) = sqrt(L2norm(x))
