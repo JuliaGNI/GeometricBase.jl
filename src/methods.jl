@@ -26,6 +26,8 @@ function timespan end
 function timestep end
 function timesteps end
 
+function initialstate end
+
 initialtime(x) = timespan(x)[begin]
 finaltime(x) = timespan(x)[end]
 
@@ -47,3 +49,4 @@ function description end
 function reference end
 
 function value end
+function variables end
