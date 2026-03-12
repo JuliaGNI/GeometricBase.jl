@@ -20,6 +20,7 @@ parent(::AV) where {AV<:AbstractVariable} = error("parent() method not implement
 
 isnan(a::AbstractVariable) = any(isnan, parent(a))
 
+
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
 size(a::AbstractVariable, ind...) = size(parent(a), ind...)
 eachindex(a::AbstractVariable) = eachindex(parent(a))
@@ -31,6 +32,11 @@ zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
 Base.:(==)(x::AbstractVariable, y::AbstractVariable) = parent(x) == parent(y)
 Base.:(==)(x::AbstractVariable, y::AbstractArray) = parent(x) == y
 Base.:(==)(x::AbstractArray, y::AbstractVariable) = y == x
+
+# Base.:(≠)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) ≠ parent(y)
+Base.:(≠)(x::AbstractVariable, y::AbstractVariable) = parent(x) ≠ parent(y)
+Base.:(≠)(x::AbstractVariable, y::AbstractArray) = parent(x) ≠ y
+Base.:(≠)(x::AbstractArray, y::AbstractVariable) = y ≠ x
 
 # Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
 Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
@@ -61,6 +67,11 @@ Base.:(≈)(x::Number, y::AbstractScalarVariable, args...; kwargs...) = ≈(y, x
 abstract type AbstractStateVariable{DT,N,AT} <: AbstractVariable{DT,N} end
 
 parenttype(::AbstractStateVariable{DT,N,AT}) where {DT,N,AT} = AT
+
+Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .+= parent(b)
+Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .+= b
+# Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .-= parent(b)
+# Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .-= b
 
 function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N}}
     @assert axes(dst) == axes(src)
@@ -98,6 +109,8 @@ Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
 
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::TimeVariable) = parent(a) .+= parent(b)
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::Number) = parent(a) .+= b
+# Base.broadcasted(::typeof(:(-)), a::TimeVariable, b::TimeVariable) = parent(a) .-= parent(b)
+# Base.broadcasted(::typeof(:(-)), a::TimeVariable, b::Number) = parent(a) .-= b
 
 add!(t::TimeVariable{DT}, Δt::DT) where {DT} = t .+= Δt
 copy!(t::TimeVariable{DT}, y::DT) where {DT} = t .= y
