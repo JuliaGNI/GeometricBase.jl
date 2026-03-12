@@ -2,7 +2,7 @@ using GeometricBase
 using Test
 
 using GeometricBase: StateWithError, TimeVariable, VectorfieldVariable
-using GeometricBase: periodic, value, solutionkeys, vectorfieldkeys
+using GeometricBase: periodic, value, statekeys, solutionkeys, vectorfieldkeys
 using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot
 using GeometricBase: _state, _vectorfield
 
@@ -59,7 +59,8 @@ end
     @test nextind(st, 1) == 2
     @test prevind(st, 2) == 1
 
-    @test keys(st) == Val.(keys(state(st)))
+    @test keys(st) == keys(state(st))
+    @test statekeys(st) == Val.(keys(state(st)))
     @test solutionkeys(st) == Val.(keys(solution(st)))
     @test vectorfieldkeys(st) == Val.(keys(vectorfield(st)))
 
@@ -108,29 +109,23 @@ end
     @test hasproperty(st, :q̇)
     @test hasproperty(st, :ṗ)
 
-    @test haskey(st, Val(:q))
-    @test haskey(st, Val(:p))
-    @test haskey(st, Val(:λ))
-    @test haskey(st, Val(:q̇))
-    @test haskey(st, Val(:ṗ))
-
     @test haskey(st, :q)
     @test haskey(st, :p)
     @test haskey(st, :λ)
     @test haskey(st, :q̇)
     @test haskey(st, :ṗ)
 
-    @test Val(:q) ∈ keys(st)
-    @test Val(:p) ∈ keys(st)
-    @test Val(:λ) ∈ keys(st)
-    @test Val(:q̇) ∈ keys(st)
-    @test Val(:ṗ) ∈ keys(st)
+    @test :q ∈ keys(st)
+    @test :p ∈ keys(st)
+    @test :λ ∈ keys(st)
+    @test :q̇ ∈ keys(st)
+    @test :ṗ ∈ keys(st)
 
-    @test :q ∈ keys(state(st))
-    @test :p ∈ keys(state(st))
-    @test :λ ∈ keys(state(st))
-    @test :q̇ ∈ keys(state(st))
-    @test :ṗ ∈ keys(state(st))
+    @test Val(:q) ∈ statekeys(st)
+    @test Val(:p) ∈ statekeys(st)
+    @test Val(:λ) ∈ statekeys(st)
+    @test Val(:q̇) ∈ statekeys(st)
+    @test Val(:ṗ) ∈ statekeys(st)
 
     @test Val(:t) ∉ solutionkeys(st)
     @test Val(:q) ∈ solutionkeys(st)
@@ -163,6 +158,7 @@ end
     @test cst.λ == st.λ
 
     @test keys(cst) == keys(st)
+    @test statekeys(cst) == statekeys(st)
     @test solutionkeys(cst) == solutionkeys(st)
     @test vectorfieldkeys(cst) == vectorfieldkeys(st)
 

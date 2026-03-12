@@ -1,7 +1,7 @@
 using Unicode: normalize
 
 export HistoryState, State
-export solution, state, time, vectorfield
+export solution, state, timevariable, vectorfield
 
 
 # The `_state` function returns an appropriate empty state for a given state variable.
@@ -91,13 +91,14 @@ function State(initialtime::Real, ics::NamedTuple; initialize=true)
 
     # copy initial conditions to state if initialize == true
     initialize && copy!(time, initialtime)
-    initialize && initialize!(state, ics)
+    initialize && copy!(state, ics)
 
     return state
 end
 
-State(st::State, args...; kwargs...) = State(time(st), solution(st), args...; kwargs...)
-State(st::StateWithError, args...; kwargs...) = State(state(st), args...; kwargs...)
+State(initialtime::TimeVariable, ics::NamedTuple; kwargs...) = State(value(initialtime), ics; kwargs...)
+State(st::State; kwargs...) = State(time(st), solution(st); kwargs...)
+State(st::StateWithError; kwargs...) = State(state(st); kwargs...)
 
 
 
@@ -106,8 +107,9 @@ State(st::StateWithError, args...; kwargs...) = State(state(st), args...; kwargs
 
 Return the keys of all the state variables in the `State`.
 """
-Base.keys(::State{TT,stT,solT,vecT,stKeys}) where {TT,stT,solT,vecT,stKeys} = stKeys
+Base.keys(st::State) = keys(state(st))
 
+statekeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = stKeys
 solutionkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
 vectorfieldkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
 
@@ -117,8 +119,9 @@ vectorfieldkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,
 
 Checks if `s` is a valid state variable in the `State`.
 """
-Base.haskey(st::State, s::Val) = s ∈ keys(st)
-Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
+# Base.haskey(st::State, s::Val) = s ∈ keys(st)
+# Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
+Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
 
 
 function Base.hasproperty(st::State, s::Symbol)
@@ -126,7 +129,7 @@ function Base.hasproperty(st::State, s::Symbol)
 end
 
 function Base.getproperty(st::State, s::Symbol)
-    if haskey(st, s)
+    if haskey(getfield(st, :state), s)
         return getfield(st, :state)[s]
     elseif s === :t
         return value(getfield(st, :time))
@@ -136,7 +139,7 @@ function Base.getproperty(st::State, s::Symbol)
 end
 
 function Base.setproperty!(st::State, s::Symbol, x)
-    if haskey(st, s)
+    if haskey(getfield(st, :state), s)
         return copy!(getfield(st, :state)[s], x)
     elseif s === :t
         return copy!(getfield(st, :time), x)
@@ -146,7 +149,7 @@ function Base.setproperty!(st::State, s::Symbol, x)
 end
 
 timevariable(st::State) = st.time
-time(st::State) = value(timevariable(st))
+Base.time(st::State) = value(timevariable(st))
 state(st::State) = st.state
 solution(st::State) = st.solution
 vectorfield(st::State) = st.vectorfield
@@ -184,9 +187,19 @@ The keys of `ics` must be the same as the solution keys of the state.
 - `st`: the state to copy into
 - `ics`: the named tuple containing the initial values to copy
 """
-function initialize!(st::State, sol::NamedTuple)
-    @assert keys(solution(st)) == keys(sol)
-    map((x, y) -> copy!(x, y), values(solution(st)), values(sol))
+function copy!(st::State, sol::NamedTuple)
+    # @assert keys(sol) == keys(solution(st))
+    # map((x, y) -> copy!(x, y), values(solution(st)), values(sol))
+    # println("  keys(sol) = ", keys(sol))
+    # println("  keys(st)  = ", keys(st))
+    @assert keys(sol) ⊆ keys(st)
+    map(k -> copy!(state(st)[k], sol[k]), keys(sol))
+    return st
+end
+
+function copy!(st::State, t::Union{Real,TimeVariable}, sol::NamedTuple)
+    copy!(st, sol)
+    copy!(st.time, t)
     return st
 end
 
