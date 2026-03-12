@@ -1,7 +1,7 @@
 using Unicode: normalize
 
 export HistoryState, State
-export solution, state, vectorfield
+export solution, state, timevariable, vectorfield
 
 
 # The `_state` function returns an appropriate empty state for a given state variable.
@@ -43,6 +43,7 @@ It stores all the information that is required to uniquely determine the state o
 in particular all state variables and their corresponding vector fields.
 """
 struct State{
+    timeType<:TimeVariable,
     stateType<:NamedTuple,
     solutionType<:NamedTuple,
     vectorfieldType<:NamedTuple,
@@ -51,20 +52,24 @@ struct State{
     vectorfieldKeys
 }
 
+    time::timeType
     state::stateType
     solution::solutionType
     vectorfield::vectorfieldType
 
-    function State(state, solution, vectorfield)
+    function State(time, state, solution, vectorfield)
         stateKeys = Val.(keys(state))
         solutionKeys = Val.(keys(solution))
         vectorfieldKeys = Val.(keys(vectorfield))
 
-        new{typeof(state),typeof(solution),typeof(vectorfield),stateKeys,solutionKeys,vectorfieldKeys}(state, solution, vectorfield)
+        new{typeof(time),typeof(state),typeof(solution),typeof(vectorfield),stateKeys,solutionKeys,vectorfieldKeys}(time, state, solution, vectorfield)
     end
 end
 
-function State(ics::NamedTuple; initialize=true)
+function State(initialtime::Real, ics::NamedTuple; initialize=true)
+    # create time variable
+    time = TimeVariable(zero(initialtime))
+
     # create solution tuple for all variables in ics
     solution = map(x -> _state(x), ics)
 
@@ -82,13 +87,19 @@ function State(ics::NamedTuple; initialize=true)
     state_fields = merge(solution, vectorfield_dots)
 
     # create state
-    state = State(state_fields, solution, vectorfield_filtered)
+    state = State(time, state_fields, solution, vectorfield_filtered)
 
     # copy initial conditions to state if initialize == true
+    initialize && copy!(time, initialtime)
     initialize && copy!(state, ics)
 
     return state
 end
+
+State(initialtime::TimeVariable, ics::NamedTuple; kwargs...) = State(value(initialtime), ics; kwargs...)
+State(st::State; kwargs...) = State(time(st), solution(st); kwargs...)
+State(st::StateWithError; kwargs...) = State(state(st); kwargs...)
+
 
 
 """
@@ -96,10 +107,11 @@ end
 
 Return the keys of all the state variables in the `State`.
 """
-Base.keys(::State{stT,solT,vecT,stKeys}) where {stT,solT,vecT,stKeys} = stKeys
+Base.keys(st::State) = keys(state(st))
 
-solutionkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
-vectorfieldkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
+statekeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = stKeys
+solutionkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
+vectorfieldkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
 
 """
     haskey(st::State, ::Val{s})
@@ -107,30 +119,37 @@ vectorfieldkeys(::State{stT,solT,vecT,stKeys,solKeys,vecKeys}) where {stT,solT,v
 
 Checks if `s` is a valid state variable in the `State`.
 """
-Base.haskey(st::State, s::Val) = s ∈ keys(st)
-Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
+# Base.haskey(st::State, s::Val) = s ∈ keys(st)
+# Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
+Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
 
 
 function Base.hasproperty(st::State, s::Symbol)
-    haskey(st, s) || hasfield(State, s)
+    s === :t || haskey(st, s) || hasfield(State, s)
 end
 
 function Base.getproperty(st::State, s::Symbol)
-    if haskey(st, s)
-        return value(getfield(st, :state)[s])
+    if haskey(getfield(st, :state), s)
+        return getfield(st, :state)[s]
+    elseif s === :t
+        return value(getfield(st, :time))
     else
         return getfield(st, s)
     end
 end
 
 function Base.setproperty!(st::State, s::Symbol, x)
-    if haskey(st, s)
+    if haskey(getfield(st, :state), s)
         return copy!(getfield(st, :state)[s], x)
+    elseif s === :t
+        return copy!(getfield(st, :time), x)
     else
         return setfield!(st, s, x)
     end
 end
 
+timevariable(st::State) = st.time
+Base.time(st::State) = value(timevariable(st))
 state(st::State) = st.state
 solution(st::State) = st.solution
 vectorfield(st::State) = st.vectorfield
@@ -158,30 +177,52 @@ Base.isnan(st::State) = mapfoldl(isnan, |, variables(st))
 
 
 """
-    copy!(st::State, sol::NamedTuple)
+    initialize!(st::State, ics::NamedTuple)
 
-Copy the values from a `NamedTuple` `sol` to the `State` `st`.
+Copy the values from a `NamedTuple` `ics` to the `State` `st`.
 
-The keys of `sol` must be a subset of the keys of the state.
+The keys of `ics` must be the same as the solution keys of the state.
 
 # Arguments
 - `st`: the state to copy into
-- `sol`: the named tuple containing the solution values to copy
+- `ics`: the named tuple containing the initial values to copy
 """
-function Base.copy!(st::State, sol::NamedTuple)
-    @assert keys(sol) ⊆ keys(state(st))
-    map(k -> copy!(st[k], sol[k]), keys(sol))
+function copy!(st::State, sol::NamedTuple)
+    # @assert keys(sol) == keys(solution(st))
+    # map((x, y) -> copy!(x, y), values(solution(st)), values(sol))
+    # println("  keys(sol) = ", keys(sol))
+    # println("  keys(st)  = ", keys(st))
+    @assert keys(sol) ⊆ keys(st)
+    map(k -> copy!(state(st)[k], sol[k]), keys(sol))
     return st
 end
 
+function copy!(st::State, t::Union{Real,TimeVariable}, sol::NamedTuple)
+    copy!(st, sol)
+    copy!(st.time, t)
+    return st
+end
+
+"""
+    copy!(dst::State, src::State)
+
+Copy the values from one `State` `src` to another `State` `dst`.
+
+The keys of `src` and `dst` must identical.
+
+# Arguments
+- `src`: the state to copy into
+- `dst`: the state containing the solution values to copy
+"""
 function Base.copy!(dst::State, src::State)
     @assert keys(dst) == keys(src)
-    map((x,y) -> copy!(x,y), variables(dst), variables(src))
+    copy!(dst.time, src.time)
+    map((x, y) -> copy!(x, y), variables(dst), variables(src))
     return dst
 end
 
 function Base.copy(oldstate::State)
-    newstate = State(solution(oldstate))
+    newstate = State(time(oldstate), solution(oldstate))
     copy!(newstate, oldstate)
     return newstate
 end
@@ -203,5 +244,5 @@ function HistoryState(st::State)
     history_vectorfield = NamedTuple{_add_bar.(keys(vectorfield(st)))}(values(vectorfield(st)))
 
     # create history state
-    State(history_state, history_solution, history_vectorfield)
+    State(timevariable(st), history_state, history_solution, history_vectorfield)
 end

@@ -18,14 +18,8 @@ abstract type AbstractVariable{DT,N} <: AbstractArray{DT,N} end
 
 parent(::AV) where {AV<:AbstractVariable} = error("parent() method not implemented for abstract variable ", AV)
 
-
-# The `value` function returns a processable value for any given `AbstractVariable`.
-# In most cases, this is just the variable itself, but for an `AbstractScalarVariable`
-# it is the scalar value stored in the 0d array (see `TimeVariable` for more details).
-value(a::AbstractVariable) = a
-value(x::Missing) = x
-
 isnan(a::AbstractVariable) = any(isnan, parent(a))
+
 
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
 size(a::AbstractVariable, ind...) = size(parent(a), ind...)
@@ -38,6 +32,11 @@ zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
 Base.:(==)(x::AbstractVariable, y::AbstractVariable) = parent(x) == parent(y)
 Base.:(==)(x::AbstractVariable, y::AbstractArray) = parent(x) == y
 Base.:(==)(x::AbstractArray, y::AbstractVariable) = y == x
+
+# Base.:(≠)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) ≠ parent(y)
+Base.:(≠)(x::AbstractVariable, y::AbstractVariable) = parent(x) ≠ parent(y)
+Base.:(≠)(x::AbstractVariable, y::AbstractArray) = parent(x) ≠ y
+Base.:(≠)(x::AbstractArray, y::AbstractVariable) = y ≠ x
 
 # Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
 Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
@@ -68,6 +67,11 @@ Base.:(≈)(x::Number, y::AbstractScalarVariable, args...; kwargs...) = ≈(y, x
 abstract type AbstractStateVariable{DT,N,AT} <: AbstractVariable{DT,N} end
 
 parenttype(::AbstractStateVariable{DT,N,AT}) where {DT,N,AT} = AT
+
+Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .+= parent(b)
+Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .+= b
+# Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .-= parent(b)
+# Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .-= b
 
 function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N}}
     @assert axes(dst) == axes(src)
@@ -105,6 +109,8 @@ Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
 
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::TimeVariable) = parent(a) .+= parent(b)
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::Number) = parent(a) .+= b
+# Base.broadcasted(::typeof(:(-)), a::TimeVariable, b::TimeVariable) = parent(a) .-= parent(b)
+# Base.broadcasted(::typeof(:(-)), a::TimeVariable, b::Number) = parent(a) .-= b
 
 add!(t::TimeVariable{DT}, Δt::DT) where {DT} = t .+= Δt
 copy!(t::TimeVariable{DT}, y::DT) where {DT} = t .= y
@@ -185,18 +191,6 @@ verifyrange(s::StateVariable, i) = value(s, i) ≥ range(s, i)[begin] && value(s
 verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
 
 Base.:(==)(x::StateVariable, y::StateVariable) = parent(x) == parent(y) && range(x) == range(y) && periodic(x) == periodic(y)
-
-
-struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
-    value::AT
-end
-VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
-VectorfieldVariable(x::StateVariable) = VectorfieldVariable(zero(parent(x)))
-
-parent(v::VectorfieldVariable) = v.value
-
-copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
-zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
 
 
 struct AlgebraicVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
@@ -317,6 +311,18 @@ end
 function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
     add!(s, parent(Δs))
 end
+
+
+struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
+    value::AT
+end
+VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
+VectorfieldVariable(x::AbstractStateVariable) = VectorfieldVariable(zero(parent(x)))
+
+parent(v::VectorfieldVariable) = v.value
+
+copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
+zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
 
 
 """
