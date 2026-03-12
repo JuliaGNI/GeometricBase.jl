@@ -193,18 +193,6 @@ verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i 
 Base.:(==)(x::StateVariable, y::StateVariable) = parent(x) == parent(y) && range(x) == range(y) && periodic(x) == periodic(y)
 
 
-struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
-    value::AT
-end
-VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
-VectorfieldVariable(x::StateVariable) = VectorfieldVariable(zero(parent(x)))
-
-parent(v::VectorfieldVariable) = v.value
-
-copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
-zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
-
-
 struct AlgebraicVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
     value::AT
 end
@@ -323,6 +311,18 @@ end
 function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
     add!(s, parent(Δs))
 end
+
+
+struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
+    value::AT
+end
+VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
+VectorfieldVariable(x::AbstractStateVariable) = VectorfieldVariable(zero(parent(x)))
+
+parent(v::VectorfieldVariable) = v.value
+
+copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
+zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
 
 
 """
