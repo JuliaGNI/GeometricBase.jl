@@ -138,6 +138,11 @@ Base.:(//)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) // value(b)
 Base.:(^)(a::TimeVariable, b::Number) = TimeVariable(value(a)^b)
 
 
+"""
+`StateVariable{T,N,AT,RT,PT}` is a wrapper around a `AT <: AbstractArray{T,N}` that holds one of the variables consituting the state of a dynamical system.
+
+The `value` field holds the actual data, the `range` field holds the range of valid values, and the `periodic` field holds a bitmask indicating which dimensions are periodic.
+"""
 struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
     value::AT
     range::RT
