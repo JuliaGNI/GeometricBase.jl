@@ -221,12 +221,13 @@ function Base.copy!(dst::State, src::State)
     return dst
 end
 
-function Base.copy(oldstate::State)
-    newstate = State(time(oldstate), solution(oldstate))
-    copy!(newstate, oldstate)
-    return newstate
+function Base.copy(st::State)
+    copy!(zero(st), st)
 end
 
+function Base.zero(st::State)
+    State(time(st), solution(st); initialize=false)
+end
 
 """
     HistoryState(st::State)
