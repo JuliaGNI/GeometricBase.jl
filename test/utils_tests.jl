@@ -25,8 +25,13 @@ end
 
     x = [3.0, 4.0]
 
+    x2 = Float64[]
+
     @test L2norm(x) == 25.0
     @test l2norm(x) == 5.0
+
+    @test L2norm(x2) == 0.0
+    @test l2norm(x2) == 0.0
 
     x = [4.0, 5.0]
     y = [1.0, 1.0]
