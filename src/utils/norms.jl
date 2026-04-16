@@ -1,11 +1,12 @@
 
-function L2norm(x)
-    mapreduce(xᵢ -> xᵢ * xᵢ, +, x)
-end
-
 function L2norm(x, y)
     @assert axes(x) == axes(y)
     mapfoldl(z -> (z[1] - z[2])^2, +, zip(x, y))
+end
+
+function L2norm(x::AbstractVector{T}) where {T}
+    length(x) == 0 && return zero(T)
+    mapreduce(xᵢ -> xᵢ * xᵢ, +, x)
 end
 
 l2norm(x) = sqrt(L2norm(x))
