@@ -9,6 +9,8 @@ function L2norm(x::AbstractVector{T}) where {T}
     mapreduce(xᵢ -> xᵢ * xᵢ, +, x)
 end
 
+L2norm(x::Real) = x^2
+
 l2norm(x) = sqrt(L2norm(x))
 l2norm(x, y) = sqrt(L2norm(x, y))
 
