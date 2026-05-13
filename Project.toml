@@ -1,6 +1,6 @@
 name = "GeometricBase"
 uuid = "9a0b12b7-583b-4f04-aa1f-d8551b6addc9"
-version = "0.14.5"
+version = "0.14.6"
 authors = ["Michael Kraus"]
 
 [deps]
