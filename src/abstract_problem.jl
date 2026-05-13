@@ -1,9 +1,7 @@
 
 export AbstractProblem, isAbstractProblem
 
-
 abstract type AbstractProblem end
-
 
 isAbstractProblem(::Any) = false
 

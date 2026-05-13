@@ -1,7 +1,6 @@
 using GeometricBase
 using Test
 
-
 struct TestIntegrator <: AbstractIntegrator end
 
 int = TestIntegrator()

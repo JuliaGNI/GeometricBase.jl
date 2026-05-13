@@ -1,8 +1,8 @@
 
 export DynamicalSystem
 export LagrangianSystem, DegenerateLagrangianSystem, RegularLagrangianSystem
-export HamiltonianSystem, CanonicalHamiltonianSystem, NoncanonicalHamiltonianSystem, PoissonSystem
-
+export HamiltonianSystem, CanonicalHamiltonianSystem, NoncanonicalHamiltonianSystem,
+       PoissonSystem
 
 abstract type AbstractSystem end
 

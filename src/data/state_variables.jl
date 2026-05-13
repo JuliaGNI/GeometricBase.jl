@@ -10,23 +10,23 @@ export add!, reset!, periodic, value, zerovector
 isperiodic(::Number, args...) = false
 isperiodic(::AbstractArray, args...) = false
 
-
 """
 `AbstractVariable{T,N}` is a wrapper around a `AbstractArray{T,N}` that provides context for the nature of the variable.
 """
-abstract type AbstractVariable{DT,N} <: AbstractArray{DT,N} end
+abstract type AbstractVariable{DT, N} <: AbstractArray{DT, N} end
 
-parent(::AV) where {AV<:AbstractVariable} = error("parent() method not implemented for abstract variable ", AV)
+function parent(::AV) where {AV <: AbstractVariable}
+    error("parent() method not implemented for abstract variable ", AV)
+end
 
 isnan(a::AbstractVariable) = any(isnan, parent(a))
-
 
 axes(a::AbstractVariable, ind...) = axes(parent(a), ind...)
 size(a::AbstractVariable, ind...) = size(parent(a), ind...)
 eachindex(a::AbstractVariable) = eachindex(parent(a))
 getindex(a::AbstractVariable, ind...) = getindex(parent(a), ind...)
 setindex!(a::AbstractVariable, x, ind...) = setindex!(parent(a), x, ind...)
-zero(a::AST) where {AST<:AbstractVariable} = AST(zero(parent(a)))
+zero(a::AST) where {AST <: AbstractVariable} = AST(zero(parent(a)))
 
 # Base.:(==)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) == parent(y)
 Base.:(==)(x::AbstractVariable, y::AbstractVariable) = parent(x) == parent(y)
@@ -39,15 +39,20 @@ Base.:(≠)(x::AbstractVariable, y::AbstractArray) = parent(x) ≠ y
 Base.:(≠)(x::AbstractArray, y::AbstractVariable) = y ≠ x
 
 # Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
-Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...) = ≈(parent(x), parent(y), args...; kwargs...)
-Base.:(≈)(x::AbstractVariable, y::AbstractArray, args...; kwargs...) = ≈(parent(x), y, args...; kwargs...)
-Base.:(≈)(x::AbstractArray, y::AbstractVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
-
+function Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...)
+    ≈(parent(x), parent(y), args...; kwargs...)
+end
+function Base.:(≈)(x::AbstractVariable, y::AbstractArray, args...; kwargs...)
+    ≈(parent(x), y, args...; kwargs...)
+end
+function Base.:(≈)(x::AbstractArray, y::AbstractVariable, args...; kwargs...)
+    ≈(y, x, args...; kwargs...)
+end
 
 """
 `AbstractScalarVariable{T}` is a wrapper around a zero-dimensional `AbstractArray{T,0}` that provides context for the nature of the variable, e.g., time.
 """
-abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT,0} end
+abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT, 0} end
 
 Base.:(==)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) == value(y)
 Base.:(==)(x::AbstractScalarVariable, y::Number) = value(x) == y
@@ -57,44 +62,61 @@ Base.:(≠)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) ≠
 Base.:(≠)(x::AbstractScalarVariable, y::Number) = value(x) ≠ y
 Base.:(≠)(x::Number, y::AbstractScalarVariable) = y ≠ x
 
-Base.:(≈)(x::AbstractScalarVariable, y::AbstractScalarVariable, args...; kwargs...) = ≈(value(x), value(y), args...; kwargs...)
-Base.:(≈)(x::AbstractScalarVariable, y::Number, args...; kwargs...) = ≈(value(x), y, args...; kwargs...)
-Base.:(≈)(x::Number, y::AbstractScalarVariable, args...; kwargs...) = ≈(y, x, args...; kwargs...)
+function Base.:(≈)(x::AbstractScalarVariable, y::AbstractScalarVariable, args...; kwargs...)
+    ≈(value(x), value(y), args...; kwargs...)
+end
+function Base.:(≈)(x::AbstractScalarVariable, y::Number, args...; kwargs...)
+    ≈(value(x), y, args...; kwargs...)
+end
+function Base.:(≈)(x::Number, y::AbstractScalarVariable, args...; kwargs...)
+    ≈(y, x, args...; kwargs...)
+end
 
 """
 `AbstractStateVariable{T,N,AT}` is a wrapper around a `AT <: AbstractArray{T,N}` that provides context for the nature of the variable, e.g., a state or a vector field.
 """
-abstract type AbstractStateVariable{DT,N,AT} <: AbstractVariable{DT,N} end
+abstract type AbstractStateVariable{DT, N, AT} <: AbstractVariable{DT, N} end
 
-parenttype(::AbstractStateVariable{DT,N,AT}) where {DT,N,AT} = AT
+parenttype(::AbstractStateVariable{DT, N, AT}) where {DT, N, AT} = AT
 
-Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .+= parent(b)
-Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .+= b
+function Base.broadcasted(
+        ::typeof(:(+)), a::AbstractStateVariable, b::AbstractStateVariable)
+    parent(a) .+= parent(b)
+end
+function Base.broadcasted(::typeof(:(+)), a::AbstractStateVariable, b::AbstractArray)
+    parent(a) .+= b
+end
 # Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractStateVariable) = parent(a) .-= parent(b)
 # Base.broadcasted(::typeof(:(-)), a::AbstractStateVariable, b::AbstractArray) = parent(a) .-= b
 
-function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N}}
+function copy!(
+        dst::AbstractStateVariable{
+            DT, N, AT}, src::AT) where {DT, N, AT <: AbstractArray{DT, N}}
     @assert axes(dst) == axes(src)
     copy!(parent(dst), src)
 end
 
 # This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
-function copy!(dst::AbstractStateVariable{DT,1,AT}, src::AT) where {DT,AT<:AbstractArray{DT,1}}
+function copy!(dst::AbstractStateVariable{DT, 1, AT},
+        src::AT) where {
+        DT, AT <: AbstractArray{DT, 1}}
     @assert axes(dst) == axes(src)
     copy!(parent(dst), src)
 end
 
-function copy!(dst::AbstractStateVariable{DT,N,AT}, src::AbstractStateVariable{DT,N,AT}) where {DT,N,AT<:AbstractArray{DT,N}}
+function copy!(dst::AbstractStateVariable{DT, N, AT},
+        src::AbstractStateVariable{DT, N, AT}) where {DT, N, AT <: AbstractArray{DT, N}}
     copy!(dst, parent(src))
 end
 
-function add!(s::AbstractStateVariable{DT,N,AT}, Δs::AT) where {DT,N,AT<:AbstractArray{DT,N}}
+function add!(s::AbstractStateVariable{DT, N, AT},
+        Δs::AT) where {
+        DT, N, AT <: AbstractArray{DT, N}}
     @assert axes(s) == axes(Δs)
     parent(s) .+= Δs
 end
 
-
-struct TimeVariable{DT<:Number,AT<:AbstractArray{DT,0}} <: AbstractScalarVariable{DT}
+struct TimeVariable{DT <: Number, AT <: AbstractArray{DT, 0}} <: AbstractScalarVariable{DT}
     value::AT
 end
 
@@ -104,8 +126,8 @@ TimeVariable(x::Number) = TimeVariable(fill(x))
 parent(t::TimeVariable) = t.value
 value(t::TimeVariable) = parent(t)[1]
 
-Base.convert(::Type{<:TimeVariable{T}}, x::T) where {T<:Number} = TimeVariable(x)
-Base.convert(::Type{T}, x::TimeVariable{T}) where {T<:Number} = value(x)
+Base.convert(::Type{<:TimeVariable{T}}, x::T) where {T <: Number} = TimeVariable(x)
+Base.convert(::Type{T}, x::TimeVariable{T}) where {T <: Number} = value(x)
 
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::TimeVariable) = parent(a) .+= parent(b)
 Base.broadcasted(::typeof(:(+)), a::TimeVariable, b::Number) = parent(a) .+= b
@@ -137,31 +159,40 @@ Base.:(//)(a::Number, b::TimeVariable) = TimeVariable(a // value(b))
 Base.:(//)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) // value(b))
 Base.:(^)(a::TimeVariable, b::Number) = TimeVariable(value(a)^b)
 
-
 """
 `StateVariable{T,N,AT,RT,PT}` is a wrapper around a `AT <: AbstractArray{T,N}` that holds one of the variables consituting the state of a dynamical system.
 
 The `value` field holds the actual data, the `range` field holds the range of valid values, and the `periodic` field holds a bitmask indicating which dimensions are periodic.
 """
-struct StateVariable{DT,N,AT,RT,PT} <: AbstractStateVariable{DT,N,AT}
+struct StateVariable{DT, N, AT, RT, PT} <: AbstractStateVariable{DT, N, AT}
     value::AT
     range::RT
     periodic::PT
 
-    function StateVariable(value::AT, range::RT, periodic::PT) where {DT,N,AT<:AbstractArray{DT,N},RT<:Tuple{AT,AT},PT<:BitArray{N}}
+    function StateVariable(value::AT,
+            range::RT,
+            periodic::PT) where {
+            DT, N, AT <: AbstractArray{DT, N}, RT <: Tuple{AT, AT}, PT <: BitArray{N}}
         @assert axes(value) == axes(range[1]) == axes(range[2]) == axes(periodic)
-        new{DT,N,AT,RT,PT}(value, range, periodic)
+        new{DT, N, AT, RT, PT}(value, range, periodic)
     end
 end
 
-function StateVariable(value::AT, range::RT) where {DT,N,AT<:AbstractArray{DT,N},RT<:Tuple{AT,AT}}
-    periodic = BitArray(range[begin][i] ≠ -DT(Inf) && range[end][i] ≠ +DT(Inf) for i in eachindex(range[begin], range[end]))
+function StateVariable(
+        value::AT, range::RT) where {
+        DT, N, AT <: AbstractArray{DT, N}, RT <: Tuple{AT, AT}}
+    periodic = BitArray(range[begin][i] ≠ -DT(Inf) && range[end][i] ≠ +DT(Inf)
+    for i in eachindex(range[begin], range[end]))
     StateVariable(value, (range[begin], range[end]), periodic)
 end
 
-StateVariable(value::AT, range_min::AT, range_max::AT) where {DT,N,AT<:AbstractArray{DT,N}} = StateVariable(value, (range_min, range_max))
+function StateVariable(
+        value::AT, range_min::AT, range_max::AT) where {
+        DT, N, AT <: AbstractArray{DT, N}}
+    StateVariable(value, (range_min, range_max))
+end
 
-function StateVariable(value::AT) where {DT,N,AT<:AbstractArray{DT,N}}
+function StateVariable(value::AT) where {DT, N, AT <: AbstractArray{DT, N}}
     range_min = zero(value)
     range_max = zero(value)
 
@@ -174,7 +205,10 @@ end
 StateVariable(value, ::NullPeriodicity) = StateVariable(value)
 
 StateVariable(s::StateVariable) = StateVariable(parent(s), range(s), periodic(s))
-StateVariable(s::StateVariable{DT,N,AT}, range::Tuple{AT,AT}) where {DT,N,AT<:AbstractArray{DT,N}} = StateVariable(parent(s), range)
+function StateVariable(s::StateVariable{DT, N, AT},
+        range::Tuple{AT, AT}) where {DT, N, AT <: AbstractArray{DT, N}}
+    StateVariable(parent(s), range)
+end
 
 Base.range(s::StateVariable) = s.range
 periodic(s::StateVariable) = s.periodic
@@ -192,13 +226,19 @@ isperiodic(s::StateVariable, i) = periodic(s)[i]
 copy(s::StateVariable) = StateVariable(copy(parent(s)), range(s), periodic(s))
 zero(s::StateVariable) = StateVariable(zero(parent(s)), range(s), periodic(s))
 
-verifyrange(s::StateVariable, i) = value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end]
-verifyrange(s::StateVariable) = BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
+function verifyrange(s::StateVariable, i)
+    value(s, i) ≥ range(s, i)[begin] && value(s, i) ≤ range(s, i)[end]
+end
+function verifyrange(s::StateVariable)
+    BitArray(verifyrange(s::StateVariable, i) for i in eachindex(s))
+end
 
-Base.:(==)(x::StateVariable, y::StateVariable) = parent(x) == parent(y) && range(x) == range(y) && periodic(x) == periodic(y)
+function Base.:(==)(x::StateVariable, y::StateVariable)
+    parent(x) == parent(y) && range(x) == range(y) && periodic(x) == periodic(y)
+end
 
-
-struct AlgebraicVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
+struct AlgebraicVariable{DT, N, AT <: AbstractArray{DT, N}} <:
+       AbstractStateVariable{DT, N, AT}
     value::AT
 end
 
@@ -210,8 +250,7 @@ parent(a::AlgebraicVariable) = a.value
 copy(a::AlgebraicVariable) = AlgebraicVariable(copy(parent(a)))
 zero(a::AlgebraicVariable) = AlgebraicVariable(zero(parent(a)))
 
-
-struct Increment{DT,N,VT<:AbstractVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
+struct Increment{DT, N, VT <: AbstractVariable{DT, N}} <: AbstractStateVariable{DT, N, VT}
     var::VT
 end
 
@@ -224,20 +263,25 @@ zero(i::Increment) = Increment(zero(parent(i)))
 
 reset!(i::Increment) = parent(parent(i)) .= 0
 
-function add!(s::VT, Δs::Increment{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+function add!(
+        s::VT, Δs::Increment{
+            DT, N, VT}) where {DT, N, VT <: AbstractStateVariable{DT, N}}
     @assert axes(s) == axes(Δs)
     s .+= Δs
 end
 
-function add!(s::Increment{DT,N,VT}, Δs::AT) where {DT,N,AT<:AbstractArray{DT,N},VT<:AbstractStateVariable{DT,N,AT}}
+function add!(s::Increment{DT, N, VT},
+        Δs::AT) where {
+        DT, N, AT <: AbstractArray{DT, N}, VT <: AbstractStateVariable{DT, N, AT}}
     @assert axes(s) == axes(Δs)
     parent(parent(s)) .+= Δs
 end
 
-function add!(s::Increment{DT,N,VT}, Δs::VT) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+function add!(
+        s::Increment{DT, N, VT}, Δs::VT) where {
+        DT, N, VT <: AbstractStateVariable{DT, N}}
     add!(parent(parent(s)), parent(Δs))
 end
-
 
 """
 The `vectorfield` function returns a datastructure that stores the vectorfield for an
@@ -248,13 +292,13 @@ constant fields that should not be present in the vector field.
 """
 vectorfield(s::AbstractStateVariable) = VectorfieldVariable(zero(parent(s)))
 
-
-struct StateWithError{DT,N,VT<:AbstractStateVariable{DT,N}} <: AbstractStateVariable{DT,N,VT}
+struct StateWithError{DT, N, VT <: AbstractStateVariable{DT, N}} <:
+       AbstractStateVariable{DT, N, VT}
     state::VT
     error::VT
 
-    function StateWithError(state::VT) where {DT,N,VT<:AbstractStateVariable{DT,N}}
-        new{DT,N,VT}(state, zero(state))
+    function StateWithError(state::VT) where {DT, N, VT <: AbstractStateVariable{DT, N}}
+        new{DT, N, VT}(state, zero(state))
     end
 end
 
@@ -269,32 +313,42 @@ verifyrange(s::StateWithError, args...) = verifyrange(s.state, args...)
 
 Base.:(==)(x::StateWithError, y::StateWithError) = x.state == y.state && x.error == y.error
 
-const StateVariableWithError{DT,N,AT,RT,PT} = StateWithError{DT,N,StateVariable{DT,N,AT,RT,PT}} where {DT,N,AT,RT,PT}
+const StateVariableWithError{DT, N, AT, RT,
+PT} = StateWithError{DT, N, StateVariable{DT, N, AT, RT, PT}} where {DT, N, AT, RT, PT}
 
-function copy!(dst::StateWithError{DT,N,VT}, src::AT) where {DT,N,AT<:AbstractArray{DT,N},VT<:AbstractStateVariable{DT,N,AT}}
+function copy!(dst::StateWithError{DT, N, VT},
+        src::AT) where {
+        DT, N, AT <: AbstractArray{DT, N}, VT <: AbstractStateVariable{DT, N, AT}}
     @assert axes(dst) == axes(src)
     copy!(state(dst), src)
     dst.error .= 0
 end
 
 # This is necessarry to disambiguate `copy!(dst::AbstractVector, src::AbstractVector)`
-function copy!(dst::StateWithError{DT,1,VT}, src::AT) where {DT,AT<:AbstractArray{DT,1},VT<:AbstractStateVariable{DT,1,AT}}
+function copy!(dst::StateWithError{DT, 1, VT},
+        src::AT) where {
+        DT, AT <: AbstractArray{DT, 1}, VT <: AbstractStateVariable{DT, 1, AT}}
     @assert axes(dst) == axes(src)
     copy!(parent(dst), src)
     dst.error .= 0
 end
 
-function copy!(dst::StateWithError{DT,N,VT}, src::VT) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+function copy!(
+        dst::StateWithError{
+            DT, N, VT}, src::VT) where {DT, N, VT <: AbstractStateVariable{DT, N}}
     copy!(dst, parent(src))
 end
 
-function copy!(dst::StateWithError{DT,N,VT}, src::StateWithError{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+function copy!(dst::StateWithError{DT, N, VT},
+        src::StateWithError{DT, N, VT}) where {DT, N, VT <: AbstractStateVariable{DT, N}}
     @assert axes(dst) == axes(src)
     copy!(dst.state, src.state)
     copy!(dst.error, src.error)
 end
 
-function add!(s::StateWithError{DT,N,VT}, Δs::AT) where {DT,N,AT<:AbstractArray{DT,N},VT<:AbstractStateVariable{DT,N,AT}}
+function add!(s::StateWithError{DT, N, VT},
+        Δs::AT) where {
+        DT, N, AT <: AbstractArray{DT, N}, VT <: AbstractStateVariable{DT, N, AT}}
     @assert axes(s) == axes(Δs)
     # compensated summation
     for k in eachindex(s.state, s.error, Δs)
@@ -313,12 +367,13 @@ function add!(s::StateWithError{DT,N,VT}, Δs::AT) where {DT,N,AT<:AbstractArray
     return s
 end
 
-function add!(s::StateWithError{DT,N,VT}, Δs::Increment{DT,N,VT}) where {DT,N,VT<:AbstractStateVariable{DT,N}}
+function add!(s::StateWithError{DT, N, VT},
+        Δs::Increment{DT, N, VT}) where {DT, N, VT <: AbstractStateVariable{DT, N}}
     add!(s, parent(Δs))
 end
 
-
-struct VectorfieldVariable{DT,N,AT<:AbstractArray{DT,N}} <: AbstractStateVariable{DT,N,AT}
+struct VectorfieldVariable{DT, N, AT <: AbstractArray{DT, N}} <:
+       AbstractStateVariable{DT, N, AT}
     value::AT
 end
 VectorfieldVariable(x::VectorfieldVariable) = VectorfieldVariable(parent(x))
@@ -329,18 +384,16 @@ parent(v::VectorfieldVariable) = v.value
 copy(v::VectorfieldVariable) = VectorfieldVariable(copy(parent(v)))
 zero(v::VectorfieldVariable) = VectorfieldVariable(zero(parent(v)))
 
-
 """
 `StateVector{DT,VT}` is a vector of [`StateVariable`](@ref)s, where `DT` is the datatype of the state and `VT` is the
 type of the vector.
 """
-const StateVector{DT,VT} = VT where {DT,VT<:AbstractVector{<:AbstractStateVariable{DT}}}
+const StateVector{DT, VT} = VT where {DT, VT <: AbstractVector{<:AbstractStateVariable{DT}}}
 
 """
 `zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with [`zero`](@ref) applied all elements of `X`.
 """
-zerovector(X::ST) where {VT,ST<:StateVector{<:Number,VT}} = VT[zero(x) for x in X]
-
+zerovector(X::ST) where {VT, ST <: StateVector{<:Number, VT}} = VT[zero(x) for x in X]
 
 const TimeStep = Increment{<:TimeVariable}
 

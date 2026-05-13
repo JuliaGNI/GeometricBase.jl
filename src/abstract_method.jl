@@ -1,7 +1,6 @@
 
 export AbstractMethod, isAbstractMethod
 
-
 abstract type AbstractMethod end
 
 Base.parent(::AbstractMethod) = nothing
@@ -17,7 +16,6 @@ order(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 name(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 description(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 reference(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
-
 
 isAbstractMethod(::Any) = false
 

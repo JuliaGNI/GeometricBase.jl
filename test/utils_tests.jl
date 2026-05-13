@@ -4,7 +4,6 @@ using GeometricBase.Utils: _big
 using Test
 
 @testset "$(rpad("Macros",80))" begin
-
     @test _big(1) == BigFloat(1)
     @test _big(1 // 1) == BigFloat(1)
     @test _big(1.0) == BigFloat(1)
@@ -17,12 +16,9 @@ using Test
 
     @test x != y
     @test x == z
-
 end
 
-
 @testset "$(rpad("Norms",80))" begin
-
     x = [3.0, 4.0]
 
     x2 = Float64[]
@@ -38,12 +34,9 @@ end
 
     @test L2norm(x, y) == 25.0
     @test l2norm(x, y) == 5.0
-
 end
 
-
 @testset "$(rpad("Summation",80))" begin
-
     n = 100000
     d = 5
 
@@ -66,7 +59,6 @@ end
     @test x_cs == typeof(x_cs)(x_tp)
     @test x_cs == typeof(x_cs)(x_bg)
     @test x_cs ≈ x_ft rtol = 1E-12
-
 
     x = rand(d)
     y = [rand(d) for _ in 1:n]
@@ -92,5 +84,4 @@ end
     @test x_cs == typeof(x_cs)(x_tp)
     @test x_cs == typeof(x_cs)(x_bg)
     @test x_cs ≈ x_ft rtol = 1E-12
-
 end

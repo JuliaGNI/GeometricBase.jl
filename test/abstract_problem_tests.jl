@@ -1,7 +1,6 @@
 using GeometricBase
 using Test
 
-
 struct TestProblem <: AbstractProblem end
 
 problem = TestProblem()

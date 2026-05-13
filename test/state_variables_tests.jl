@@ -2,9 +2,7 @@ using GeometricBase
 using GeometricBase: AbstractVariable, AbstractStateVariable
 using Test
 
-
 function test_statevariable(Var, X, x)
-
     @test axes(X) == axes(x)
     @test size(X) == size(x)
     @test eachindex(X) == eachindex(x)
@@ -73,12 +71,9 @@ function test_statevariable(Var, X, x)
     Z .+= eps()
     @test X ≈ Z atol = 16eps()
     @test Z ≈ X atol = 16eps()
-
 end
 
-
 @testset "$(rpad("Time Variable",80))" begin
-
     t = 2.0
     T = TimeVariable(t)
     U = TimeVariable(2)
@@ -117,13 +112,12 @@ end
     @test T ≈ 4.0
     @test T ≈ 4.0 + eps()
     @test 4.0 + eps() ≈ T
-
 end
-
 
 @testset "$(rpad("State Variables",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
         for DT in (Float32, Float64), inds in ((4,), (3, 4))
+
             x = rand(DT, inds...)
             X = Var(x)
 
@@ -137,6 +131,7 @@ end
     end
 
     for DT in (Float32, Float64), inds in ((4,), (3, 4))
+
         x = rand(DT, inds...)
         X = StateVariable(x)
 
@@ -162,19 +157,17 @@ end
 
     Y = StateVariable([0.0, NaN, 2.0], ([-Inf, 0.0, 3.0], [+Inf, 2.0, 5.0]))
     @test isnan(Y)
-
 end
-
 
 @testset "$(rpad("Increment",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
-
-        @test typeof(Var(ones(Float64, 3))) <: AbstractVariable{Float64,1}
-        @test typeof(Var(ones(Int, 3))) <: AbstractVariable{Int,1}
-        @test typeof(Var(ones(Float64, 3, 4))) <: AbstractStateVariable{Float64,2}
-        @test typeof(Var(ones(Int, 3, 4))) <: AbstractStateVariable{Int,2}
+        @test typeof(Var(ones(Float64, 3))) <: AbstractVariable{Float64, 1}
+        @test typeof(Var(ones(Int, 3))) <: AbstractVariable{Int, 1}
+        @test typeof(Var(ones(Float64, 3, 4))) <: AbstractStateVariable{Float64, 2}
+        @test typeof(Var(ones(Int, 3, 4))) <: AbstractStateVariable{Int, 2}
 
         for DT in (Float32, Float64), inds in ((4,), (3, 4))
+
             x = rand(DT, inds...)
             y = rand(DT, inds...)
             X = Var(copy(x))
@@ -190,16 +183,16 @@ end
     end
 end
 
-
 @testset "$(rpad("State with Error",80))" begin
     for Var in (StateVariable, VectorfieldVariable, AlgebraicVariable)
-
-        @test typeof(Increment(Var(ones(Float64, 3)))) <: AbstractVariable{Float64,1}
-        @test typeof(Increment(Var(ones(Int, 3)))) <: AbstractVariable{Int,1}
-        @test typeof(Increment(Var(ones(Float64, 3, 4)))) <: AbstractStateVariable{Float64,2}
-        @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int,2}
+        @test typeof(Increment(Var(ones(Float64, 3)))) <: AbstractVariable{Float64, 1}
+        @test typeof(Increment(Var(ones(Int, 3)))) <: AbstractVariable{Int, 1}
+        @test typeof(Increment(Var(ones(Float64, 3, 4)))) <:
+              AbstractStateVariable{Float64, 2}
+        @test typeof(Increment(Var(ones(Int, 3, 4)))) <: AbstractStateVariable{Int, 2}
 
         for DT in (Float32, Float64), inds in ((4,), (3, 4))
+
             x = rand(DT, inds...)
             y = rand(DT, inds...)
             X = StateWithError(Var(x))
@@ -224,12 +217,6 @@ end
     end
 end
 
+@testset "$(rpad("State Vector",80))" begin end
 
-@testset "$(rpad("State Vector",80))" begin
-
-end
-
-
-@testset "$(rpad("Time Step",80))" begin
-
-end
+@testset "$(rpad("Time Step",80))" begin end

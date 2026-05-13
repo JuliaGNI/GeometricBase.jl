@@ -3,7 +3,6 @@ using Unicode: normalize
 export HistoryState, State
 export solution, state, timevariable, vectorfield
 
-
 # The `_state` function returns an appropriate empty state for a given state variable.
 # _state(x::Number) = ScalarVariable(x)
 _state(x::TimeVariable) = zero(x)
@@ -26,7 +25,7 @@ _add_bar(s::Symbol) = _add_symbol(s, Char(0x0304))
 _add_dot(s::Symbol) = _add_symbol(s, Char(0x0307))
 
 # Removes a dot or bar from a symbol.
-_strip_symbol(s::Symbol, c::Char) = Symbol(strip(normalize(String(s); decompose=true), c))
+_strip_symbol(s::Symbol, c::Char) = Symbol(strip(normalize(String(s); decompose = true), c))
 _strip_bar(s::Symbol) = _strip_symbol(s, Char(0x0304))
 _strip_dot(s::Symbol) = _strip_symbol(s, Char(0x0307))
 
@@ -35,7 +34,6 @@ _strip_dot(s::Symbol) = _strip_symbol(s, Char(0x0307))
 # q = Symbol(strip(String(:q̄), Char(0x0304)))
 # q = Symbol(strip(String(:q̇), Char(0x0307)))
 
-
 """
 Holds the solution of a geometric equation at a single time step.
 
@@ -43,15 +41,14 @@ It stores all the information that is required to uniquely determine the state o
 in particular all state variables and their corresponding vector fields.
 """
 struct State{
-    timeType<:TimeVariable,
-    stateType<:NamedTuple,
-    solutionType<:NamedTuple,
-    vectorfieldType<:NamedTuple,
+    timeType <: TimeVariable,
+    stateType <: NamedTuple,
+    solutionType <: NamedTuple,
+    vectorfieldType <: NamedTuple,
     stateKeys,
     solutionKeys,
     vectorfieldKeys
 }
-
     time::timeType
     state::stateType
     solution::solutionType
@@ -62,11 +59,13 @@ struct State{
         solutionKeys = Val.(keys(solution))
         vectorfieldKeys = Val.(keys(vectorfield))
 
-        new{typeof(time),typeof(state),typeof(solution),typeof(vectorfield),stateKeys,solutionKeys,vectorfieldKeys}(time, state, solution, vectorfield)
+        new{typeof(time), typeof(state), typeof(solution),
+            typeof(vectorfield), stateKeys, solutionKeys, vectorfieldKeys}(
+            time, state, solution, vectorfield)
     end
 end
 
-function State(initialtime::Real, ics::NamedTuple; initialize=true)
+function State(initialtime::Real, ics::NamedTuple; initialize = true)
     # create time variable
     time = TimeVariable(zero(initialtime))
 
@@ -96,11 +95,11 @@ function State(initialtime::Real, ics::NamedTuple; initialize=true)
     return state
 end
 
-State(initialtime::TimeVariable, ics::NamedTuple; kwargs...) = State(value(initialtime), ics; kwargs...)
+function State(initialtime::TimeVariable, ics::NamedTuple; kwargs...)
+    State(value(initialtime), ics; kwargs...)
+end
 State(st::State; kwargs...) = State(time(st), solution(st); kwargs...)
 State(st::StateWithError; kwargs...) = State(state(st); kwargs...)
-
-
 
 """
     keys(st::State)
@@ -109,9 +108,18 @@ Return the keys of all the state variables in the `State`.
 """
 Base.keys(st::State) = keys(state(st))
 
-statekeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = stKeys
-solutionkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = solKeys
-vectorfieldkeys(::State{TT,stT,solT,vecT,stKeys,solKeys,vecKeys}) where {TT,stT,solT,vecT,stKeys,solKeys,vecKeys} = vecKeys
+function statekeys(::State{TT, stT, solT, vecT, stKeys, solKeys,
+        vecKeys}) where {TT, stT, solT, vecT, stKeys, solKeys, vecKeys}
+    stKeys
+end
+function solutionkeys(::State{TT, stT, solT, vecT, stKeys, solKeys,
+        vecKeys}) where {TT, stT, solT, vecT, stKeys, solKeys, vecKeys}
+    solKeys
+end
+function vectorfieldkeys(::State{TT, stT, solT, vecT, stKeys, solKeys,
+        vecKeys}) where {TT, stT, solT, vecT, stKeys, solKeys, vecKeys}
+    vecKeys
+end
 
 """
     haskey(st::State, ::Val{s})
@@ -122,7 +130,6 @@ Checks if `s` is a valid state variable in the `State`.
 # Base.haskey(st::State, s::Val) = s ∈ keys(st)
 # Base.haskey(st::State, s::Symbol) = haskey(st, Val(s))
 Base.haskey(st::State, s::Symbol) = haskey(state(st), s)
-
 
 function Base.hasproperty(st::State, s::Symbol)
     s === :t || haskey(st, s) || hasfield(State, s)
@@ -155,7 +162,6 @@ solution(st::State) = st.solution
 vectorfield(st::State) = st.vectorfield
 variables(st::State) = values(state(st))
 
-
 """
     getindex(st::State, args...)
 
@@ -172,9 +178,8 @@ Base.firstindex(st::State) = firstindex(keys(st))
 Base.lastindex(st::State) = lastindex(keys(st))
 
 Base.length(st::State) = length(keys(st))
-Base.iterate(st::State, i=1) = i > length(st) ? nothing : (st[i], i + 1)
+Base.iterate(st::State, i = 1) = i > length(st) ? nothing : (st[i], i + 1)
 Base.isnan(st::State) = mapfoldl(isnan, |, variables(st))
-
 
 """
     initialize!(st::State, ics::NamedTuple)
@@ -197,7 +202,7 @@ function copy!(st::State, sol::NamedTuple)
     return st
 end
 
-function copy!(st::State, t::Union{Real,TimeVariable}, sol::NamedTuple)
+function copy!(st::State, t::Union{Real, TimeVariable}, sol::NamedTuple)
     copy!(st, sol)
     copy!(st.time, t)
     return st
@@ -226,7 +231,7 @@ function Base.copy(st::State)
 end
 
 function Base.zero(st::State)
-    State(time(st), solution(st); initialize=false)
+    State(time(st), solution(st); initialize = false)
 end
 
 """

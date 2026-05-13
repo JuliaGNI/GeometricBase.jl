@@ -16,11 +16,12 @@ isAbstractSolverState(::AbstractSolverState) = true
 """
 struct NullSolverState <: AbstractSolverState end
 
-
 """
     SolverState(::Union{<:AbstractSolver,<:SolverMethod}, args...; kwargs...)
 
 This method returns a subtype of `AbstractSolverState` according to the `AbstractSolver` or `SolverMethod` that is passed to it.
 By default, i.e., if no such method is defined for a given solver, it returns `NullSolverState`.
 """
-SolverState(::Union{<:AbstractSolver,<:SolverMethod}, args...; kwargs...) = NullSolverState()
+function SolverState(::Union{<:AbstractSolver, <:SolverMethod}, args...; kwargs...)
+    NullSolverState()
+end

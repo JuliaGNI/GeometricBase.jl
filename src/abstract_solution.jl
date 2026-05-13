@@ -3,7 +3,6 @@ export AbstractSolution, isAbstractSolution
 
 abstract type AbstractSolution{dType, tType} end
 
-
 isAbstractSolution(::Any) = false
 
 function isAbstractSolution(sol::AbstractSolution)
@@ -16,5 +15,6 @@ function isAbstractSolution(sol::AbstractSolution)
     return true
 end
 
-
-Base.write(::IOStream, sol::AbstractSolution) = error("Base.write(::IOStream, ::Solution) not implemented for ", typeof(sol))
+function Base.write(::IOStream, sol::AbstractSolution)
+    error("Base.write(::IOStream, ::Solution) not implemented for ", typeof(sol))
+end

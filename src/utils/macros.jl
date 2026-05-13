@@ -7,7 +7,6 @@ macro define(name, definition)
     end
 end
 
-
 _big(x) = x
 _big(x::Number) = big(x)
 _big(x::String) = parse(BigFloat, x)
@@ -15,7 +14,7 @@ _big(x::String) = parse(BigFloat, x)
 function _big(x::Expr)
     y = x
     y.args .= _big.(y.args)
-    return  y
+    return y
 end
 
 macro big(x)

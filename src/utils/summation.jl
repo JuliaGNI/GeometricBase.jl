@@ -9,17 +9,17 @@ function compensated_summation(x::T, δ::T, ε::T) where {T}
 end
 
 function compensated_summation(x::VT, δ::VT, ε::VT) where {T, VT <: AbstractVector{T}}
-    a  = copy(x)
-    ε  = ε .+ δ
-    x̄  = a .+ ε
+    a = copy(x)
+    ε = ε .+ δ
+    x̄ = a .+ ε
     ε̄ = ε .+ (a .- x̄)
 
     return (x̄, ε̄)
 end
 
 function compensated_summation!(x::VT, δ::VT, ε::VT) where {T, VT <: AbstractVector{T}}
-    a  = copy(x)
-    ε  = ε .+ δ
+    a = copy(x)
+    ε = ε .+ δ
     x .= a .+ ε
     ε .= ε .+ (a .- x)
 

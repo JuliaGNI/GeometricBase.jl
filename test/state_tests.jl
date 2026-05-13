@@ -6,9 +6,7 @@ using GeometricBase: periodic, value, statekeys, solutionkeys, vectorfieldkeys
 using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot
 using GeometricBase: _state, _vectorfield
 
-
 @testset "$(rpad("State Helper Functions",80))" begin
-
     x = rand(3)
 
     @test _strip_symbol(:q̄, Char(0x0304)) == :q
@@ -33,21 +31,18 @@ using GeometricBase: _state, _vectorfield
 
     @test _vectorfield(StateVariable(x)) == VectorfieldVariable(zero(x))
     @test _vectorfield(StateWithError(StateVariable(x))) == VectorfieldVariable(zero(x))
-
 end
 
-
 @testset "$(rpad("State Constructor and Access Functions",80))" begin
-
     initialtime = 1.0
 
     data = (
-        q=StateVariable(rand(3)),
-        p=StateVariable(rand(3)),
-        λ=AlgebraicVariable(rand(2)),
+        q = StateVariable(rand(3)),
+        p = StateVariable(rand(3)),
+        λ = AlgebraicVariable(rand(2))
     )
 
-    st = State(initialtime, data; initialize=false)
+    st = State(initialtime, data; initialize = false)
 
     @test state(st) == st.state
     @test solution(st) == st.solution
@@ -70,7 +65,6 @@ end
 
     @test isnan(st) == false
 
-
     @inferred state(st)
     @inferred solution(st)
     @inferred vectorfield(st)
@@ -84,7 +78,6 @@ end
     @inferred test_symbol(st, Val(:q))
     @inferred test_symbol(st, Val(:p))
 
-
     @test st.q ≠ data.q
     @test st.p ≠ data.p
     @test st.λ ≠ data.λ
@@ -94,8 +87,7 @@ end
     @test st.p == zero(data.p)
     @test st.λ == zero(data.λ)
 
-
-    st = State(initialtime, data; initialize=true)
+    st = State(initialtime, data; initialize = true)
 
     @test st.t == initialtime
     @test st.q == data.q
@@ -149,7 +141,6 @@ end
 
     @test isnan(st) == false
 
-
     cst = copy(st)
 
     @test cst.t == st.t
@@ -166,15 +157,13 @@ end
     @test solution(cst) == solution(st)
     @test vectorfield(cst) == vectorfield(st)
 
-
     data = (
-        q=StateVariable([1.0, NaN, 2.0]),
-        p=StateVariable(rand(3)),
-        λ=AlgebraicVariable(rand(2)),
+        q = StateVariable([1.0, NaN, 2.0]),
+        p = StateVariable(rand(3)),
+        λ = AlgebraicVariable(rand(2))
     )
 
-    st = State(initialtime, data; initialize=true)
+    st = State(initialtime, data; initialize = true)
 
     @test isnan(st)
-
 end

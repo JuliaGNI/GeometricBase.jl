@@ -1,7 +1,6 @@
 using GeometricBase
 using Test
 
-
 struct TestMethod <: AbstractMethod end
 
 method = TestMethod()
