@@ -9,7 +9,7 @@ struct StateData <: AbstractDataType end
 struct VectorFieldData <: AbstractDataType end
 struct TangentVectorData <: AbstractDataType end
 
-state_symbols(datatype::AbstractDataType, system::AbstractSystem) = missing
+state_symbols(datatype::AbstractDataType, system::AbstractSystem) = NTuple{0, Symbol}()
 
 state_symbols(datatype::StateData, system::RegularLagrangianSystem) = (:q, :q̇)
 state_symbols(datatype::VectorFieldData, system::RegularLagrangianSystem) = (:q̇, :q̈)

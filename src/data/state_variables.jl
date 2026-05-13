@@ -152,7 +152,7 @@ Base.:(*)(a::TimeVariable, b::Number) = TimeVariable(value(a) * b)
 Base.:(*)(a::Number, b::TimeVariable) = *(b, a)
 Base.:(*)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) * value(b))
 Base.:(/)(a::TimeVariable, b::Number) = TimeVariable(value(a) / b)
-Base.:(/)(a::Number, b::TimeVariable) = /(b, a)
+Base.:(/)(a::Number, b::TimeVariable) = TimeVariable(a / value(b))
 Base.:(/)(a::TimeVariable, b::TimeVariable) = TimeVariable(value(a) / value(b))
 Base.:(//)(a::TimeVariable, b::Number) = TimeVariable(value(a) // b)
 Base.:(//)(a::Number, b::TimeVariable) = TimeVariable(a // value(b))
@@ -314,7 +314,7 @@ verifyrange(s::StateWithError, args...) = verifyrange(s.state, args...)
 Base.:(==)(x::StateWithError, y::StateWithError) = x.state == y.state && x.error == y.error
 
 const StateVariableWithError{DT, N, AT, RT,
-PT} = StateWithError{DT, N, StateVariable{DT, N, AT, RT, PT}} where {DT, N, AT, RT, PT}
+    PT} = StateWithError{DT, N, StateVariable{DT, N, AT, RT, PT}} where {DT, N, AT, RT, PT}
 
 function copy!(dst::StateWithError{DT, N, VT},
         src::AT) where {

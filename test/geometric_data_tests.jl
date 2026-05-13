@@ -20,8 +20,8 @@ import GeometricBase: AbstractSystem, AbstractDataType
 @test typeof(VectorFieldData()) <: AbstractDataType
 @test typeof(TangentVectorData()) <: AbstractDataType
 
-@test ismissing(state_symbols(ObservableData(), LagrangianSystem()))
-@test ismissing(state_symbols(ObservableData(), HamiltonianSystem()))
+@test isempty(state_symbols(ObservableData(), LagrangianSystem()))
+@test isempty(state_symbols(ObservableData(), HamiltonianSystem()))
 
 @test state_symbols(StateData(), LagrangianSystem()) == (:q, :q̇)
 @test state_symbols(VectorFieldData(), LagrangianSystem()) == (:q̇, :q̈)

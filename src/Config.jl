@@ -4,16 +4,16 @@ export add_config, get_config, set_config,
        get_config_dictionary
 
 if !(@isdefined GNICONFIG)
-    const global GNICONFIG = Dict()
+    const global GNICONFIG = Dict{Symbol, Any}()
 end
 
-function add_config(name, value)
+function add_config(name::Symbol, value)
     if !haskey(GNICONFIG, name)
         GNICONFIG[name] = value
     end
 end
 
-function set_config(name, value)
+function set_config(name::Symbol, value)
     if haskey(GNICONFIG, name)
         GNICONFIG[name] = value
     else
@@ -21,7 +21,7 @@ function set_config(name, value)
     end
 end
 
-function get_config(name)
+function get_config(name::Symbol)
     if haskey(GNICONFIG, name)
         return GNICONFIG[name]
     else
@@ -31,7 +31,7 @@ function get_config(name)
 end
 
 function get_config_dictionary()
-    return Dict(GNICONFIG)
+    return Dict{Symbol, Any}(GNICONFIG)
 end
 
 end

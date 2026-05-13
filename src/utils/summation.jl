@@ -19,7 +19,7 @@ end
 
 function compensated_summation!(x::VT, δ::VT, ε::VT) where {T, VT <: AbstractVector{T}}
     a = copy(x)
-    ε = ε .+ δ
+    ε .+= δ
     x .= a .+ ε
     ε .= ε .+ (a .- x)
 

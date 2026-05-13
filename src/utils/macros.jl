@@ -12,7 +12,7 @@ _big(x::Number) = big(x)
 _big(x::String) = parse(BigFloat, x)
 
 function _big(x::Expr)
-    y = x
+    y = copy(x)
     y.args .= _big.(y.args)
     return y
 end

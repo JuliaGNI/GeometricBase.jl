@@ -169,7 +169,14 @@ Passes `getindex` on to the state in `State`.
 """
 Base.getindex(st::State, ::Val{s}) where {s} = getindex(state(st), s)
 Base.getindex(st::State, s::Symbol) = getindex(st, Val(s))
-Base.getindex(st::State, i::Int) = getindex(st, keys(st)[i])
+@generated function Base.getindex(st::State, i::Int)
+    ks = fieldnames(fieldtype(st, :state))
+    ex = :(throw(BoundsError(st, i)))
+    for j in length(ks):-1:1
+        ex = :(i === $j ? getindex(st, $(Val(ks[j]))) : $ex)
+    end
+    return ex
+end
 
 Base.nextind(st::State, args...) = nextind(keys(st), args...)
 Base.prevind(st::State, args...) = prevind(keys(st), args...)
