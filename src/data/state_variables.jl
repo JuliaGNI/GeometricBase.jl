@@ -391,7 +391,7 @@ type of the vector.
 const StateVector{DT, VT} = VT where {DT, VT <: AbstractVector{<:AbstractStateVariable{DT}}}
 
 """
-`zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with [`zero`](@ref) applied all elements of `X`.
+`zerovector(X::StateVector)` returns a new [`StateVector`](@ref) with `zero` applied all elements of `X`.
 """
 zerovector(X::ST) where {VT, ST <: StateVector{<:Number, VT}} = VT[zero(x) for x in X]
 
