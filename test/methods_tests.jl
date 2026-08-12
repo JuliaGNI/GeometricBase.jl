@@ -14,6 +14,7 @@ timespan(x::StepRangeLen) = x
 # a method here would apply to every implementation and there is nothing generic to say.
 
 for f in (:basis, :degree, :nnodes, :nodes, :weights)
-    @eval @test isa(GeometricBase.$f, Function)
-    @eval @test length(methods(GeometricBase.$f)) == 0
+    g = getfield(GeometricBase, f)
+    @test isa(g, Function)
+    @test length(methods(g)) == 0
 end
