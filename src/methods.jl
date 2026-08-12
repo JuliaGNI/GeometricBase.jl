@@ -19,6 +19,7 @@ function nstore end
 function nsteps end
 function nsamples end
 function nconstraints end
+function nnodes end
 
 function eachsample end
 function eachtimestep end
@@ -41,8 +42,13 @@ function periodicity end
 function initialguess end
 
 function order end
+function degree end
 function coefficients end
 function tableau end
+
+function basis end
+function nodes end
+function weights end
 
 function name end
 function description end
