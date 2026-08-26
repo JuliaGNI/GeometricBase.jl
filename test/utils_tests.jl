@@ -34,6 +34,23 @@ end
 
     @test L2norm(x, y) == 25.0
     @test l2norm(x, y) == 5.0
+
+    # any array, not just a vector: the sum of squares does not depend on the arrangement, and a
+    # caller holding a matrix should not have to `vec` it — that allocates a reshape wrapper per call
+    A = [3.0 0.0; 0.0 4.0]
+
+    @test L2norm(A) == 25.0
+    @test l2norm(A) == 5.0
+    @test L2norm(A) == L2norm(vec(A))
+
+    @test L2norm(Matrix{Float64}(undef, 0, 3)) == 0.0
+
+    # a three-dimensional array reaches the same method
+    @test L2norm(reshape([3.0, 4.0], 1, 2, 1)) == 25.0
+
+    # and a scalar still goes to the `Real` method rather than to this one
+    @test L2norm(5.0) == 25.0
+    @test l2norm(-5.0) == 5.0
 end
 
 @testset "$(rpad("Summation",80))" begin
