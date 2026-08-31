@@ -75,8 +75,11 @@ function State(initialtime::Real, ics::NamedTuple; initialize = true)
     # create vectorfield vector for all state variables in ics
     vectorfield = map(x -> _vectorfield(x), ics)
 
-    # remove all fields that are missing, i.e., that correspond to a variable without vectorfield
-    vectorfield_filtered = NamedTuple{filter(k -> !all(ismissing.(vectorfield[k])), keys(vectorfield))}(vectorfield)
+    # remove all fields that are missing, i.e., that correspond to a variable without vectorfield.
+    # `_vectorfield` returns the scalar `missing` for those, so that case is tested on its own:
+    # `all(ismissing, missing)` cannot iterate a scalar, and a broadcast here would allocate.
+    _novectorfield(x) = ismissing(x) || all(ismissing, x)
+    vectorfield_filtered = NamedTuple{filter(k -> !_novectorfield(vectorfield[k]), keys(vectorfield))}(vectorfield)
 
     # create vector field symbols with dotted solution symbols
     vectorfield_keys = map(k -> _add_dot(k), keys(vectorfield_filtered))

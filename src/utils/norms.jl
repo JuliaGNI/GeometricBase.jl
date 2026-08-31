@@ -12,7 +12,7 @@ end
 # also type piracy on this function and on `Base`'s type, since it owns neither; taking the general
 # method here retires it.
 function L2norm(x::AbstractArray{T}) where {T}
-    length(x) == 0 && return zero(T)
+    isempty(x) && return zero(T)
     mapreduce(xᵢ -> xᵢ * xᵢ, +, x)
 end
 
