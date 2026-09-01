@@ -59,7 +59,7 @@ function initialguess end
     noise(problem)
 
 The stochastic process driving a stochastic differential equation, an
-[`AbstractStochasticProcess`](@ref).
+`AbstractStochasticProcess`.
 
 The process says *which* noise drives the equation, not which realisation of it: drawing
 increments is the integrator's business, since only the integrator knows whether the scheme it
