@@ -21,6 +21,19 @@ function nsamples end
 function nconstraints end
 function nnodes end
 
+"""
+    noisedims(process)
+    noisedims(equation)
+    noisedims(problem)
+
+The number of independent Wiener processes driving a stochastic differential equation.
+
+This fixes the number of columns of the diffusion matrix, and it is what a stochastic integrator
+uses to size the increment vectors it draws each step — so it has to be answerable from the
+problem alone, before any integrator exists.
+"""
+function noisedims end
+
 function eachsample end
 function eachtimestep end
 function timespan end
@@ -40,6 +53,19 @@ function invariants end
 function parameters end
 function periodicity end
 function initialguess end
+
+"""
+    noise(equation)
+    noise(problem)
+
+The stochastic process driving a stochastic differential equation, an
+[`AbstractStochasticProcess`](@ref).
+
+The process says *which* noise drives the equation, not which realisation of it: drawing
+increments is the integrator's business, since only the integrator knows whether the scheme it
+implements needs increments that are accurate in the strong or the weak sense.
+"""
+function noise end
 
 function order end
 function degree end

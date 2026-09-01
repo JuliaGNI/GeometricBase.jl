@@ -13,9 +13,22 @@ reconstructed, because a changelog assembled after the fact loses exactly the re
 makes it worth keeping. The `[Unreleased]` target below is provisional — confirm it when the
 first entry is written.
 
-## [Unreleased] — targeting 0.15.0
+## [Unreleased] — targeting 0.14.10
+
+The provisional `0.15.0` target was lowered to a patch: everything below is additive, and
+nothing existing changes name or behaviour.
 
 ### New Features
+
+- Interface stubs `noise` and `noisedims`, declared in `src/methods.jl` beside the other
+  interface points and, like them, left unexported for downstream packages to re-export.
+
+  `AbstractStochasticProcess` has been declared here since 0.14 and `GeometricEquations` hangs a
+  `noise` field off every `SDE`, `PSDE` and `SPSDE` — but with no interface attached, a noise
+  object could not be asked anything, not even how many Wiener processes it stands for. Every
+  stochastic problem therefore had to invent a bare marker type, and a stochastic integrator had
+  no way to size its increment vectors from the problem. These two stubs are that missing
+  interface; `GeometricEquations` supplies the concrete processes and the methods on them.
 
 ### Bug Fixes
 
