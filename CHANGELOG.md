@@ -12,6 +12,25 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased] — targeting 0.14.11
+
+### Tests
+
+- `test/interface_tests.jl` asserts that no name this package owns collides with a function of the
+  same name owned by one of its direct dependencies — `Base`, `Core` and `Unicode`. Nothing was
+  found; the 85 functions this package owns are disjoint from the 6 `Unicode` owns.
+
+  It is a guard rather than a fix, added because this package declares the interface generics the
+  whole ecosystem extends, so a name re-defined here would fragment every consumer at once.
+  `GeometricIntegratorsBase` had exactly that defect against seven of these generics — the six
+  method-property predicates and `reference`, all bare-defined in its `src/method.jl` with no
+  import — and its own copy of this check is what found them.
+
+  The dependency list is derived with `Base.identify_package` rather than by testing whether the
+  module binds a dependency's name, because the latter misses one reached as `using Dep: name` —
+  which is how this package reaches `Unicode`, i.e. it would have missed the only dependency there
+  is. `Unicode` is asserted by name in the test for that reason.
+
 ## [0.14.10] — 2026-09-02
 
 The provisional `0.15.0` target was lowered to a patch: everything below is additive, and

@@ -1,5 +1,8 @@
 using SafeTestsets
 
+@safetestset "Interface Tests                                                                 " begin
+    include("interface_tests.jl")
+end
 @safetestset "Abstract Problem                                                                " begin
     include("abstract_problem_tests.jl")
 end
