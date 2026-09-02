@@ -17,8 +17,9 @@ makes it worth keeping.
 ### Tests
 
 - `test/interface_tests.jl` asserts that no name this package owns collides with a function of the
-  same name owned by one of its direct dependencies — `Base`, `Core` and `Unicode`. Nothing was
-  found; the 85 functions this package owns are disjoint from the 6 `Unicode` owns.
+  same name owned by an upstream module — `Base` and `Core`, which the check seeds, together with
+  the direct dependencies it derives, here `Unicode`. Nothing was found: the 85 functions this
+  package owns are disjoint from the 8 `Unicode` owns, on every supported Julia version.
 
   It is a guard rather than a fix, added because this package declares the interface generics the
   whole ecosystem extends, so a name re-defined here would fragment every consumer at once.
@@ -30,6 +31,10 @@ makes it worth keeping.
   module binds a dependency's name, because the latter misses one reached as `using Dep: name` —
   which is how this package reaches `Unicode`, i.e. it would have missed the only dependency there
   is. `Unicode` is asserted by name in the test for that reason.
+
+  The generated `eval` and `include` are excluded from the scan. `parentmodule` attributes them to
+  the module itself up to Julia 1.11 and to `Core` and `Base` from 1.12, so including them would
+  make both the count and the verdict depend on the Julia version.
 
 ## [0.14.10] — 2026-09-02
 

@@ -34,6 +34,10 @@ function shadowed_generics(mod::Module)
     shadows = Tuple{Symbol, Module}[]
     for n in names(mod; all = true)
         startswith(String(n), "#") && continue
+        # Every module is given an `eval` and an `include`. Up to Julia 1.11 `parentmodule` reports
+        # `mod` for both, from 1.12 `Core` and `Base`; they are generated rather than declared here
+        # either way, so skipping them keeps the scan the same on every supported version.
+        n in (:eval, :include) && continue
         isdefined(mod, n) || continue
         f = getglobal(mod, n)
         (f isa Function && parentmodule(f) === mod) || continue
@@ -51,8 +55,7 @@ end
 # `Unicode` is named explicitly rather than asserting `⊇ [Base, Core]`, which cannot fail:
 # `upstream_modules` seeds those two itself, so such an assertion would pin the seeding and say
 # nothing about the derivation. `Unicode` is this package's only declared dependency, and it is
-# reached as `using Unicode: normalize` — the binding form an earlier version of this check missed
-# entirely.
+# reached as `using Unicode: normalize`.
 @test upstream_modules(GeometricBase) ⊇ [Base, Core, Unicode]
 
 result = shadowed_generics(GeometricBase)
