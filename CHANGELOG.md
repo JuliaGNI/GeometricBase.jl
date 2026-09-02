@@ -12,7 +12,7 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
-## [Unreleased] — targeting 0.14.10
+## [0.14.10] — 2026-09-02
 
 The provisional `0.15.0` target was lowered to a patch: everything below is additive, and
 nothing existing changes name or behaviour.
@@ -28,9 +28,5 @@ nothing existing changes name or behaviour.
   stochastic problem therefore had to invent a bare marker type, and a stochastic integrator had
   no way to size its increment vectors from the problem. These two stubs are that missing
   interface; `GeometricEquations` supplies the concrete processes and the methods on them.
-
-### Bug Fixes
-
-### Breaking Changes
 
 ## Open Issues
