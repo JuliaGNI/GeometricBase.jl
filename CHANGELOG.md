@@ -36,6 +36,11 @@ makes it worth keeping.
   the module itself up to Julia 1.11 and to `Core` and `Base` from 1.12, so including them would
   make both the count and the verdict depend on the Julia version.
 
+- The root `Project.toml` no longer carries an `[extras]`/`[targets]` block. `test/Project.toml`
+  declares the test dependencies on every supported Julia version, so the block was a second and
+  silently unread copy of that list — one that had already drifted, in that it does not name
+  `Unicode`.
+
 ## [0.14.10] — 2026-09-02
 
 The provisional `0.15.0` target was lowered to a patch: everything below is additive, and
