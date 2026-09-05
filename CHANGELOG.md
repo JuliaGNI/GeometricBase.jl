@@ -12,6 +12,35 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased] — targeting 0.14.11
+
+### Tests
+
+- `test/interface_tests.jl` asserts that no name this package owns collides with a function of the
+  same name owned by an upstream module — `Base` and `Core`, which the check seeds, together with
+  the direct dependencies it derives, here `Unicode`. Nothing was found: the 85 functions this
+  package owns are disjoint from the 8 `Unicode` owns, on every supported Julia version.
+
+  It is a guard rather than a fix, added because this package declares the interface generics the
+  whole ecosystem extends, so a name re-defined here would fragment every consumer at once.
+  `GeometricIntegratorsBase` had exactly that defect against seven of these generics — the six
+  method-property predicates and `reference`, all bare-defined in its `src/method.jl` with no
+  import — and its own copy of this check is what found them.
+
+  The dependency list is derived with `Base.identify_package` rather than by testing whether the
+  module binds a dependency's name, because the latter misses one reached as `using Dep: name` —
+  which is how this package reaches `Unicode`, i.e. it would have missed the only dependency there
+  is. `Unicode` is asserted by name in the test for that reason.
+
+  The generated `eval` and `include` are excluded from the scan. `parentmodule` attributes them to
+  the module itself up to Julia 1.11 and to `Core` and `Base` from 1.12, so including them would
+  make both the count and the verdict depend on the Julia version.
+
+- The root `Project.toml` no longer carries an `[extras]`/`[targets]` block. `test/Project.toml`
+  declares the test dependencies on every supported Julia version, so the block was a second and
+  silently unread copy of that list — one that had already drifted, in that it does not name
+  `Unicode`.
+
 ## [0.14.10] — 2026-09-02
 
 The provisional `0.15.0` target was lowered to a patch: everything below is additive, and
