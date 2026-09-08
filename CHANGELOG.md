@@ -18,8 +18,8 @@ makes it worth keeping.
 
 - `src/data/data_types.jl`, `test/geometric_data_tests.jl` and `test/state_tests.jl` are now
   Unicode NFC-normalised. The first two stored `ṗ` and `ż` as a base letter plus a combining mark,
-  the third `ṗ` alone, inherited from macOS rather than chosen. `q̇` and `q̈` have no precomposed
-  codepoint and are unchanged.
+  the third `ṗ` alone, inherited from macOS rather than chosen. `q̇`, `q̈` and `q̄` have no
+  precomposed codepoint and are unchanged.
 
   Nothing about the compiled code changes — Julia's parser normalises identifiers to NFC — but a
   `grep` pattern or an editor search typed in NFC now matches, where before it silently matched
