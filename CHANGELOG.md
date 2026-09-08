@@ -12,6 +12,20 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased]
+
+### Changed
+
+- `src/data/data_types.jl` and the two test files that exercise it are now Unicode
+  NFC-normalised. They stored `ṗ` and `ż` as a base letter plus a combining mark, inherited from
+  macOS rather than chosen. Nothing about the compiled code changes — Julia's parser normalises
+  identifiers to NFC — but a `grep` pattern or an editor search typed in NFC now matches, where
+  before it silently matched nothing. Each file is byte-equal to the NFC normalisation of its
+  predecessor, and no string literal was affected.
+
+  `_add_symbol` and `_strip_symbol` in `src/data/state.jl` were already normalisation-correct and
+  are untouched: they normalise explicitly rather than relying on the encoding of the source.
+
 ## [0.14.11] — 2026-09-05
 
 ### Tests
