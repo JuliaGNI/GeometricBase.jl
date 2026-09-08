@@ -20,9 +20,9 @@ state_symbols(datatype::VectorFieldData, system::DegenerateLagrangianSystem) = (
 state_symbols(datatype::TangentVectorData, system::DegenerateLagrangianSystem) = (:q, :q̇)
 
 state_symbols(datatype::StateData, system::CanonicalHamiltonianSystem) = (:q, :p)
-state_symbols(datatype::VectorFieldData, system::CanonicalHamiltonianSystem) = (:q̇, :ṗ)
+state_symbols(datatype::VectorFieldData, system::CanonicalHamiltonianSystem) = (:q̇, :ṗ)
 function state_symbols(datatype::TangentVectorData, system::CanonicalHamiltonianSystem)
-    (:q, :p, :q̇, :ṗ)
+    (:q, :p, :q̇, :ṗ)
 end
 
 function state_symbols(datatype::StateData, system::Union{
@@ -31,9 +31,9 @@ function state_symbols(datatype::StateData, system::Union{
 end
 function state_symbols(datatype::VectorFieldData, system::Union{
         NoncanonicalHamiltonianSystem, PoissonSystem})
-    (:ż,)
+    (:ż,)
 end
 function state_symbols(datatype::TangentVectorData, system::Union{
         NoncanonicalHamiltonianSystem, PoissonSystem})
-    (:z, :ż)
+    (:z, :ż)
 end

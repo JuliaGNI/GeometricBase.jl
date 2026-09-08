@@ -32,13 +32,13 @@ import GeometricBase: AbstractSystem, AbstractDataType
 @test state_symbols(TangentVectorData(), DegenerateLagrangianSystem()) == (:q, :q̇)
 
 @test state_symbols(StateData(), HamiltonianSystem()) == (:q, :p)
-@test state_symbols(VectorFieldData(), HamiltonianSystem()) == (:q̇, :ṗ)
-@test state_symbols(TangentVectorData(), HamiltonianSystem()) == (:q, :p, :q̇, :ṗ)
+@test state_symbols(VectorFieldData(), HamiltonianSystem()) == (:q̇, :ṗ)
+@test state_symbols(TangentVectorData(), HamiltonianSystem()) == (:q, :p, :q̇, :ṗ)
 
 @test state_symbols(StateData(), NoncanonicalHamiltonianSystem()) == (:z,)
-@test state_symbols(VectorFieldData(), NoncanonicalHamiltonianSystem()) == (:ż,)
-@test state_symbols(TangentVectorData(), NoncanonicalHamiltonianSystem()) == (:z, :ż)
+@test state_symbols(VectorFieldData(), NoncanonicalHamiltonianSystem()) == (:ż,)
+@test state_symbols(TangentVectorData(), NoncanonicalHamiltonianSystem()) == (:z, :ż)
 
 @test state_symbols(StateData(), PoissonSystem()) == (:z,)
-@test state_symbols(VectorFieldData(), PoissonSystem()) == (:ż,)
-@test state_symbols(TangentVectorData(), PoissonSystem()) == (:z, :ż)
+@test state_symbols(VectorFieldData(), PoissonSystem()) == (:ż,)
+@test state_symbols(TangentVectorData(), PoissonSystem()) == (:z, :ż)
