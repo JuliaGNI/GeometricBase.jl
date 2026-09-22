@@ -82,3 +82,24 @@ function reference end
 
 function value end
 function variables end
+
+"""
+    h5save(h5, x; path = "/")
+
+Write `x` into the HDF5 file or group `h5`, under the group `path`.
+
+This function has no methods here. A package that stores one of its types in HDF5 adds a method,
+usually in a package extension on `HDF5`, so that one function serves every type.
+"""
+function h5save end
+
+"""
+    h5load(T, h5, args...; path = "/")
+
+Read an object of type `T` from the group `path` of the HDF5 file or group `h5`, as written by
+[`h5save`](@ref). The trailing arguments supply what the file cannot hold, for example the problem
+that a solution belongs to.
+
+This function has no methods here. See [`h5save`](@ref).
+"""
+function h5load end

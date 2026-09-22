@@ -14,6 +14,14 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Added
+
+- `h5save(h5, x; path)` and `h5load(T, h5, args...; path)`, two generic functions for HDF5 storage.
+  They have no methods here, and nothing here depends on HDF5. A package adds methods for its own
+  types, usually in an `HDF5` package extension, so that one function serves every type and two
+  packages that both store data do not export two different `h5save` bindings. The first methods
+  are in GeometricSolutions' `EnsembleSolution` extension.
+
 ### Changed
 
 - `src/data/data_types.jl`, `test/geometric_data_tests.jl` and `test/state_tests.jl` are now
