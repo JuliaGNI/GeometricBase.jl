@@ -6,6 +6,13 @@ authors = ["Michael Kraus"]
 [deps]
 Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
+[weakdeps]
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+
+[extensions]
+GeometricBaseHDF5Ext = "HDF5"
+
 [compat]
+HDF5 = "0.16.11, 0.17"
 Unicode = "1.10"
 julia = "1.10"

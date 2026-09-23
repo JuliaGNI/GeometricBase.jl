@@ -12,7 +12,7 @@ timespan(x::StepRangeLen) = x
 # generic function each instead of defining their own. They carry no methods of their own:
 # a method here would apply to every implementation and there is nothing generic to say.
 
-for f in (:basis, :degree, :h5load, :h5save, :nnodes, :nodes, :weights)
+for f in (:basis, :degree, :nnodes, :nodes, :weights)
     g = getfield(GeometricBase, f)
     @test isa(g, Function)
     @test length(methods(g)) == 0

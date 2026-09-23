@@ -30,6 +30,9 @@ end
 @safetestset "Methods                                                                         " begin
     include("methods_tests.jl")
 end
+@safetestset "HDF5 Extension                                                                  " begin
+    include("hdf5_tests.jl")
+end
 @safetestset "Types                                                                           " begin
     include("types_tests.jl")
 end

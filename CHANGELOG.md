@@ -16,10 +16,11 @@ makes it worth keeping.
 
 ### Added
 
-- `h5save(h5, x; path)` and `h5load(T, h5, args...; path)`, two generic functions for HDF5 storage.
-  They have no methods here, and nothing here depends on HDF5. A package adds methods for its own
-  types, usually in an `HDF5` package extension, so that one function serves every type and two
-  packages that both store data do not export two different `h5save` bindings.
+- `h5save(h5, x; path)` and `h5load(T, h5, args...; path)`, generic functions for HDF5 storage, with
+  file-path forms supplied by the HDF5 package extension. A package that stores its types in HDF5
+  adds methods in an extension on HDF5, typing `h5` as `HDF5.H5DataStore` and choosing its own
+  default for `path`, so that one function serves every type and two packages that both store data
+  do not export two different `h5save` bindings.
 
 ### Changed
 
