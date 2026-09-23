@@ -82,3 +82,32 @@ function reference end
 
 function value end
 function variables end
+
+"""
+    h5save(h5, x; path)
+    h5save(fpath::AbstractString, x, args...; mode = "w", kwargs...)
+
+Write `x` into the HDF5 file or group `h5`, under the group `path`.
+
+A package that stores one of its types in HDF5 adds a method for that type, usually in a package
+extension on `HDF5`, so that one function serves every type. The method types `h5` as
+`HDF5.H5DataStore`, and it chooses its own default for `path`.
+
+The second form opens the file `fpath` with `mode`, and calls the first form on it with the other
+arguments. It is defined when `HDF5` is loaded, and it works for every type with a method of the
+first form. An untyped `h5` makes a method of the first form ambiguous with it.
+"""
+function h5save end
+
+"""
+    h5load(T, h5, args...; path)
+    h5load(T, fpath::AbstractString, args...; kwargs...)
+
+Read an object of type `T` from the group `path` of the HDF5 file or group `h5`, as written by
+[`h5save`](@ref). The trailing arguments supply what the file cannot hold, for example the problem
+that a solution belongs to.
+
+A method types `h5` as `HDF5.H5DataStore`, and it chooses its own default for `path`. The second
+form opens the file `fpath` read-only, and calls the first form on it. See [`h5save`](@ref).
+"""
+function h5load end

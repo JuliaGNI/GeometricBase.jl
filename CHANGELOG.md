@@ -14,6 +14,14 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Added
+
+- `h5save(h5, x; path)` and `h5load(T, h5, args...; path)`, generic functions for HDF5 storage, with
+  file-path forms supplied by the HDF5 package extension. A package that stores its types in HDF5
+  adds methods in an extension on HDF5, typing `h5` as `HDF5.H5DataStore` and choosing its own
+  default for `path`, so that one function serves every type and two packages that both store data
+  do not export two different `h5save` bindings.
+
 ### Changed
 
 - `src/data/data_types.jl`, `test/geometric_data_tests.jl` and `test/state_tests.jl` are now
