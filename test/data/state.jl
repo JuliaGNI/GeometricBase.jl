@@ -6,6 +6,10 @@ using GeometricBase: periodic, value, statekeys, solutionkeys, vectorfieldkeys
 using GeometricBase: _strip_symbol, _strip_bar, _strip_dot, _add_symbol, _add_bar, _add_dot
 using GeometricBase: _state, _vectorfield
 
+using Random
+
+Random.seed!(1234)
+
 @testset "$(rpad("State Helper Functions",80))" begin
     x = rand(3)
 
