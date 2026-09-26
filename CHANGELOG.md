@@ -82,5 +82,3 @@ nothing existing changes name or behaviour.
   stochastic problem therefore had to invent a bare marker type, and a stochastic integrator had
   no way to size its increment vectors from the problem. These two stubs are that missing
   interface; `GeometricEquations` supplies the concrete processes and the methods on them.
-
-## Open Issues
