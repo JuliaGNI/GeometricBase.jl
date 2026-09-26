@@ -12,6 +12,25 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased]
+
+### Changed
+
+- The test suite follows the layout of the other JuliaGNI packages. `test/runtests.jl` holds one
+  `core` group of `@safetestset` lines. Each test file mirrors the source file it tests:
+  `test/data/state.jl`, `test/data/state_variables.jl`, `test/Utils.jl` and so on.
+  `interface_tests.jl` and `hdf5_tests.jl` test the whole package and are now
+  `test/integration/interface.jl` and `test/integration/hdf5_ext.jl`. `geometric_data_tests.jl`
+  tests `src/data/data_types.jl` and `src/data/system_types.jl`, and is now
+  `test/data/data_and_system_types.jl`.
+- The four test files that draw random numbers seed the RNG.
+
+### Added
+
+- `test/quality/aqua.jl` runs Aqua's checks. Its ambiguity check is `broken`: `range` for a
+  `StateWithError` is ambiguous with `Base.range` (issue #22). Aqua and Random are new test
+  dependencies.
+
 ## [0.14.12] — 2026-09-23
 
 ### Added

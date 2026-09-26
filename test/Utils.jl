@@ -1,7 +1,10 @@
 using Base: TwicePrecision
 using GeometricBase.Utils
 using GeometricBase.Utils: _big
+using Random
 using Test
+
+Random.seed!(1234)
 
 @testset "$(rpad("Macros",80))" begin
     @test _big(1) == BigFloat(1)

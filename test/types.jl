@@ -1,6 +1,9 @@
 using Base: Callable, TwicePrecision
 using GeometricBase
+using Random
 using Test
+
+Random.seed!(1234)
 
 @testset "$(rpad("Null Types",80))" begin
     invs = NullInvariants()

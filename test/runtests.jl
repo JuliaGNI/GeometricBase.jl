@@ -1,41 +1,20 @@
 using SafeTestsets
 
-@safetestset "Interface Tests                                                                 " begin
-    include("interface_tests.jl")
-end
-@safetestset "Abstract Problem                                                                " begin
-    include("abstract_problem_tests.jl")
-end
-@safetestset "Abstract Solution                                                               " begin
-    include("abstract_solution_tests.jl")
-end
-@safetestset "Abstract Integrator                                                             " begin
-    include("abstract_integrator_tests.jl")
-end
-@safetestset "Abstract Method                                                                 " begin
-    include("abstract_method_tests.jl")
-end
-@safetestset "Abstract Solver                                                                 " begin
-    include("abstract_solver_tests.jl")
-end
-@safetestset "Geometric Data                                                                  " begin
-    include("geometric_data_tests.jl")
-end
-@safetestset "State Variables                                                                 " begin
-    include("state_variables_tests.jl")
-end
-@safetestset "States                                                                          " begin
-    include("state_tests.jl")
-end
-@safetestset "Methods                                                                         " begin
-    include("methods_tests.jl")
-end
-@safetestset "HDF5 Extension                                                                  " begin
-    include("hdf5_tests.jl")
-end
-@safetestset "Types                                                                           " begin
-    include("types_tests.jl")
-end
-@safetestset "Utils                                                                           " begin
-    include("utils_tests.jl")
+const GROUPS = isempty(ARGS) ? ["core", "slow"] : ARGS
+
+if "core" in GROUPS
+    @safetestset "Aqua" include("quality/aqua.jl")
+    @safetestset "Interface Tests" include("integration/interface.jl")
+    @safetestset "Abstract Problem" include("abstract_problem.jl")
+    @safetestset "Abstract Solution" include("abstract_solution.jl")
+    @safetestset "Abstract Integrator" include("abstract_integrator.jl")
+    @safetestset "Abstract Method" include("abstract_method.jl")
+    @safetestset "Abstract Solver" include("abstract_solver.jl")
+    @safetestset "Data and System Types" include("data/data_and_system_types.jl")
+    @safetestset "State Variables" include("data/state_variables.jl")
+    @safetestset "States" include("data/state.jl")
+    @safetestset "Methods" include("methods.jl")
+    @safetestset "HDF5 Extension" include("integration/hdf5_ext.jl")
+    @safetestset "Types" include("types.jl")
+    @safetestset "Utils" include("Utils.jl")
 end

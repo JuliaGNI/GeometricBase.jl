@@ -1,6 +1,9 @@
 using GeometricBase
 using GeometricBase: AbstractVariable, AbstractStateVariable
+using Random
 using Test
+
+Random.seed!(1234)
 
 function test_statevariable(Var, X, x)
     @test axes(X) == axes(x)
