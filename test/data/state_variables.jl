@@ -264,4 +264,17 @@ end
     @test (T1 ≠ 3.0) === !(T1 == 3.0)
     @test (2.0 ≠ T1) === !(2.0 == T1)
     @test (3.0 ≠ T1) === !(3.0 == T1)
+
+    # StateVariable: `==` also compares `range` and `periodic`
+    s1 = StateVariable([1.0, 2.0, 3.0])
+    s2 = StateVariable([1.0, 2.0, 3.0], ([0.0, 0.0, 0.0], [4.0, 4.0, 4.0]))
+    @test s1 ≠ s2
+    @test (s1 ≠ s2) === !(s1 == s2)
+
+    # StateWithError: `==` also compares `error`
+    w1 = StateWithError(StateVariable([1.0, 2.0]))
+    w2 = StateWithError(StateVariable([1.0, 2.0]))
+    w2.error[1] = 1e-3
+    @test w1 ≠ w2
+    @test (w1 ≠ w2) === !(w1 == w2)
 end
