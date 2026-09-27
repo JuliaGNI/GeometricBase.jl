@@ -33,11 +33,6 @@ Base.:(==)(x::AbstractVariable, y::AbstractVariable) = parent(x) == parent(y)
 Base.:(==)(x::AbstractVariable, y::AbstractArray) = parent(x) == y
 Base.:(==)(x::AbstractArray, y::AbstractVariable) = y == x
 
-# Base.:(≠)(x::AV, y::AV) where {AV<:AbstractVariable} = parent(x) ≠ parent(y)
-Base.:(≠)(x::AbstractVariable, y::AbstractVariable) = parent(x) ≠ parent(y)
-Base.:(≠)(x::AbstractVariable, y::AbstractArray) = parent(x) ≠ y
-Base.:(≠)(x::AbstractArray, y::AbstractVariable) = y ≠ x
-
 # Base.:(≈)(x::AV, y::AV, args...; kwargs...) where {AV<:AbstractVariable} = ≈(parent(x), parent(y), args...; kwargs...)
 function Base.:(≈)(x::AbstractVariable, y::AbstractVariable, args...; kwargs...)
     ≈(parent(x), parent(y), args...; kwargs...)
@@ -57,10 +52,6 @@ abstract type AbstractScalarVariable{DT} <: AbstractVariable{DT, 0} end
 Base.:(==)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) == value(y)
 Base.:(==)(x::AbstractScalarVariable, y::Number) = value(x) == y
 Base.:(==)(x::Number, y::AbstractScalarVariable) = y == x
-
-Base.:(≠)(x::AbstractScalarVariable, y::AbstractScalarVariable) = value(x) ≠ value(y)
-Base.:(≠)(x::AbstractScalarVariable, y::Number) = value(x) ≠ y
-Base.:(≠)(x::Number, y::AbstractScalarVariable) = y ≠ x
 
 function Base.:(≈)(x::AbstractScalarVariable, y::AbstractScalarVariable, args...; kwargs...)
     ≈(value(x), value(y), args...; kwargs...)

@@ -14,6 +14,19 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Fixed
+
+- Removed redundant `Base.:(≠)` method definitions from `src/data/state_variables.jl` for
+  `(AbstractVariable, AbstractVariable)`, `(AbstractVariable, AbstractArray)`,
+  `(AbstractArray, AbstractVariable)`, `(AbstractScalarVariable, AbstractScalarVariable)`,
+  `(AbstractScalarVariable, Number)`, and `(Number, AbstractScalarVariable)`. Each was a direct
+  mirror of an existing `Base.:(==)` method; Base already derives `!=` and `≠` from `==` via
+  `!=(x, y) = !(x == y)`, making explicit overloads redundant and prone to drift. This change
+  corrects a latent inconsistency: for two `StateVariable` instances, `≠` now agrees with the
+  specific `==` method (which compares `parent`, `range`, and `periodic`), rather than falling
+  back to a generic comparison of `parent` alone. Verified with tests, including arrays
+  containing `missing`.
+
 ### Changed
 
 - The test suite follows the layout of the other JuliaGNI packages. `test/runtests.jl` holds one

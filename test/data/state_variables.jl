@@ -225,3 +225,43 @@ end
 
 @testset "$(rpad("Time Step",80))" begin
 end
+
+@testset "$(rpad("Not Equal",80))" begin
+    # AbstractVariable vs AbstractVariable
+    a = VectorfieldVariable([1.0, 2.0, 3.0])
+    b = VectorfieldVariable([1.0, 2.0, 3.0])
+    c = VectorfieldVariable([1.0, 2.0, 4.0])
+    @test (a ≠ b) === !(a == b)
+    @test (a ≠ c) === !(a == c)
+
+    # AbstractVariable vs AbstractArray, and the reverse
+    arr = [1.0, 2.0, 3.0]
+    arr2 = [9.0, 2.0, 3.0]
+    @test (a ≠ arr) === !(a == arr)
+    @test (a ≠ arr2) === !(a == arr2)
+    @test (arr ≠ a) === !(arr == a)
+    @test (arr2 ≠ a) === !(arr2 == a)
+
+    # an array holding `missing`
+    m1 = VectorfieldVariable(Union{Missing, Float64}[1.0, missing, 3.0])
+    m2 = VectorfieldVariable(Union{Missing, Float64}[1.0, missing, 3.0])
+    m3 = VectorfieldVariable(Union{Missing, Float64}[1.0, missing, 9.0])
+    marr = Union{Missing, Float64}[1.0, missing, 3.0]
+    @test isequal(m1 ≠ m2, !(m1 == m2))
+    @test isequal(m1 ≠ m3, !(m1 == m3))
+    @test isequal(m1 ≠ marr, !(m1 == marr))
+    @test isequal(marr ≠ m1, !(marr == m1))
+
+    # AbstractScalarVariable vs AbstractScalarVariable
+    T1 = TimeVariable(2.0)
+    T2 = TimeVariable(2.0)
+    T3 = TimeVariable(3.0)
+    @test (T1 ≠ T2) === !(T1 == T2)
+    @test (T1 ≠ T3) === !(T1 == T3)
+
+    # AbstractScalarVariable vs Number, and the reverse
+    @test (T1 ≠ 2.0) === !(T1 == 2.0)
+    @test (T1 ≠ 3.0) === !(T1 == 3.0)
+    @test (2.0 ≠ T1) === !(2.0 == T1)
+    @test (3.0 ≠ T1) === !(3.0 == T1)
+end
