@@ -16,16 +16,16 @@ makes it worth keeping.
 
 ### Fixed
 
-- Removed redundant `Base.:(≠)` method definitions from `src/data/state_variables.jl` for
-  `(AbstractVariable, AbstractVariable)`, `(AbstractVariable, AbstractArray)`,
-  `(AbstractArray, AbstractVariable)`, `(AbstractScalarVariable, AbstractScalarVariable)`,
-  `(AbstractScalarVariable, Number)`, and `(Number, AbstractScalarVariable)`. Each was a direct
-  mirror of an existing `Base.:(==)` method; Base already derives `!=` and `≠` from `==` via
-  `!=(x, y) = !(x == y)`, making explicit overloads redundant and prone to drift. This change
-  corrects a latent inconsistency: for two `StateVariable` instances, `≠` now agrees with the
-  specific `==` method (which compares `parent`, `range`, and `periodic`), rather than falling
-  back to a generic comparison of `parent` alone. Verified with tests, including arrays
-  containing `missing`.
+- `x ≠ y` (and `x != y`) now agrees with whatever `Base.:(==)` method actually applies for `x`
+  and `y`, instead of always falling back to a plain `parent`-array comparison. For two
+  `StateVariable`s that differ only in `range` or `periodic` (not in their values), `x ≠ y`
+  now correctly returns `true` (it previously returned `false`, disagreeing with `x == y`, which
+  was already `false` there too — an existing inconsistency). The same fix applies to two
+  `StateWithError`s that differ only in `error` (not in `state`), and to an `Increment` wrapping
+  such a variable, since `Increment` forwards `==` to what it wraps. `Base` already derives
+  `≠`/`!=` from `==` via `!=(x, y) = !(x == y)`, so the six `Base.:(≠)` methods removed from
+  `src/data/state_variables.jl` were redundant overloads that could (and did, for these two
+  cases) silently drift out of sync with the corresponding `==` methods.
 
 ### Changed
 
