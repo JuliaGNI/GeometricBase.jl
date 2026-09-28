@@ -37,6 +37,8 @@ makes it worth keeping.
   tests `src/data/data_types.jl` and `src/data/system_types.jl`, and is now
   `test/data/data_and_system_types.jl`.
 - The four test files that draw random numbers seed the RNG.
+- The tests assert `!isnan(x)` directly, not `isnan(x) == false`. The three assertions are
+  stricter, as an `isnan` that returns a non-`Bool` now fails. Nothing under `src/` changes.
 
 ### Added
 

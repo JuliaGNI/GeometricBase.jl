@@ -13,7 +13,7 @@ function test_statevariable(Var, X, x)
     @test parent(copy(X)) == x
     @test parent(zero(X)) == zero(x)
     @test zero(X) == Var(zero(x))
-    @test isnan(X) == false
+    @test !isnan(X)
 
     @test X[1] == x[1]
     @test X[2] == x[2]
