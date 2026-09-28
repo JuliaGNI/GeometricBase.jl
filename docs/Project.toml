@@ -4,3 +4,6 @@ GeometricBase = "9a0b12b7-583b-4f04-aa1f-d8551b6addc9"
 
 [sources]
 GeometricBase = {path = ".."}
+
+[compat]
+Documenter = "1.19.0"
