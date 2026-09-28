@@ -36,11 +36,3 @@ Defects found in review and not yet fixed.
   survives `test/data/data_and_system_types.jl`. No other test file names `GeometricData`.
 - **kind:** missing test
 - **found:** 2026-09-26
-
-### K5 · A CHANGELOG entry names a check that a reader cannot find.
-
-- **location:** `CHANGELOG.md:41`
-- **evidence:** the [Unreleased] entry for the copied HDF5 and Unicode bounds says "the test
-  layout check now requires" them. That check is part of a local harness, not of this repository.
-- **kind:** docs
-- **found:** 2026-09-28

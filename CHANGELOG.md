@@ -38,8 +38,8 @@ makes it worth keeping.
   `test/data/data_and_system_types.jl`.
 - The four test files that draw random numbers seed the RNG.
 - `test/Project.toml` carries the root's `[compat]` entries for HDF5 and Unicode, copied exactly.
-  Aqua's `test_deps_compat` reads only the root `Project.toml`, so the test layout check now
-  requires each dependency shared with the root to carry the same bound in `test/Project.toml`.
+  Aqua's `test_deps_compat` reads only the root `Project.toml`, so the bounds are copied into
+  `test/Project.toml`.
 
 ### Added
 
