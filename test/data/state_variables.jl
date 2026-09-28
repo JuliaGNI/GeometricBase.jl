@@ -227,9 +227,9 @@ end
 end
 
 @testset "$(rpad("Not Equal",80))" begin
-    # `≠` must agree with `==`. `isequal` compares two `Bool`s as `===` does, and also a `missing`.
+    # `≠` must agree with `==`. `===` also holds for two `missing`s, and fails for `1` and `true`.
     # fatou-ignore comparison-negation
-    noteq_agrees(x, y) = isequal(x ≠ y, !(x == y))
+    noteq_agrees(x, y) = (x ≠ y) === !(x == y)
 
     # AbstractVariable vs AbstractVariable
     a = VectorfieldVariable([1.0, 2.0, 3.0])

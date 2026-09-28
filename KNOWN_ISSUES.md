@@ -36,14 +36,3 @@ Defects found in review and not yet fixed.
   survives `test/data/data_and_system_types.jl`. No other test file names `GeometricData`.
 - **kind:** missing test
 - **found:** 2026-09-26
-
-### K5 · `noteq_agrees` accepts a `≠` that returns a non-`Bool`.
-
-- **location:** `test/data/state_variables.jl:232`
-- **evidence:** `isequal(1, true)` is `true`, so the helper passes a `≠` that returns an `Int`. The
-  mutant `Base.:(≠)(x::AbstractScalarVariable, y::Number) = Int(value(x) ≠ y)` in
-  `src/data/state_variables.jl` survives `test/data/state_variables.jl` (1738/1738 pass). The
-  `===` assertions that the helper replaces catch it. A possible fix is
-  `noteq_agrees(x, y) = (r = x ≠ y; (r isa Bool || r === missing) && isequal(r, !(x == y)))`.
-- **kind:** missing test
-- **found:** 2026-09-28

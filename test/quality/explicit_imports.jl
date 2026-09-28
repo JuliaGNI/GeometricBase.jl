@@ -2,8 +2,8 @@ using ExplicitImports
 using GeometricBase
 using Test
 
-# Fails on a stale explicit import, and on an explicit import or a qualified access through a
-# module other than the owner of the name.
+# Fails on a stale explicit import, on an explicit import or a qualified access through a module
+# other than the owner of the name, and on a qualified access to a name of `GeometricBase` itself.
 test_explicit_imports(
     GeometricBase;
     # `false` so that the guard has one form in every package of the stack;
