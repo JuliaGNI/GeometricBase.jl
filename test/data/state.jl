@@ -67,7 +67,7 @@ end
     @test iterate(st, 1) == (st[1], 2)
     @test iterate(st, 8) === nothing
 
-    @test isnan(st) == false
+    @test !isnan(st)
 
     @inferred state(st)
     @inferred solution(st)
@@ -143,7 +143,7 @@ end
     @test Val(:p) ∈ vectorfieldkeys(st)
     @test Val(:λ) ∉ vectorfieldkeys(st)
 
-    @test isnan(st) == false
+    @test !isnan(st)
 
     cst = copy(st)
 
