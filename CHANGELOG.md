@@ -39,12 +39,18 @@ makes it worth keeping.
 - The four test files that draw random numbers seed the RNG.
 - The tests assert `!isnan(x)` directly, not `isnan(x) == false`. The three assertions are
   stricter, as an `isnan` that returns a non-`Bool` now fails. Nothing under `src/` changes.
+- The docstring of `copy!(st::State, sol::NamedTuple)` names `copy!` and `sol`, not `initialize!`
+  and `ics`, and says that the keys of `sol` must be a subset of the keys of the state, as the
+  method asserts.
 
 ### Added
 
 - `test/quality/aqua.jl` runs Aqua's checks. Its ambiguity check is `broken`: `range` for a
   `StateWithError` is ambiguous with `Base.range` (issue #22). Aqua and Random are new test
   dependencies.
+- `test/quality/explicit_imports.jl` runs `ExplicitImports.test_explicit_imports`, which fails on
+  a stale explicit import and on an import through a module that does not own the name.
+  ExplicitImports 1.15 is a new test dependency.
 
 ## [0.14.12] — 2026-09-23
 

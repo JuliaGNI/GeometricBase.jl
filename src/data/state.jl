@@ -192,15 +192,15 @@ Base.iterate(st::State, i = 1) = i > length(st) ? nothing : (st[i], i + 1)
 Base.isnan(st::State) = mapfoldl(isnan, |, variables(st))
 
 """
-    initialize!(st::State, ics::NamedTuple)
+    copy!(st::State, sol::NamedTuple)
 
-Copy the values from a `NamedTuple` `ics` to the `State` `st`.
+Copy the values from a `NamedTuple` `sol` to the `State` `st`.
 
-The keys of `ics` must be the same as the solution keys of the state.
+The keys of `sol` must be a subset of the keys of the state.
 
 # Arguments
 - `st`: the state to copy into
-- `ics`: the named tuple containing the initial values to copy
+- `sol`: the named tuple containing the values to copy
 """
 function copy!(st::State, sol::NamedTuple)
     # @assert keys(sol) == keys(solution(st))
