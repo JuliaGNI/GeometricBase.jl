@@ -14,6 +14,19 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Fixed
+
+- `x ≠ y` (and `x != y`) now agrees with whatever `Base.:(==)` method actually applies for `x`
+  and `y`, instead of always falling back to a plain `parent`-array comparison. For two
+  `StateVariable`s that differ only in `range` or `periodic` (not in their values), `x ≠ y`
+  now correctly returns `true` (it previously returned `false`, disagreeing with `x == y`, which
+  was already `false` there too — an existing inconsistency). The same fix applies to two
+  `StateWithError`s that differ only in `error` (not in `state`), and to an `Increment` wrapping
+  such a variable, since `Increment` forwards `==` to what it wraps. `Base` already derives
+  `≠`/`!=` from `==` via `!=(x, y) = !(x == y)`, so the six `Base.:(≠)` methods removed from
+  `src/data/state_variables.jl` were redundant overloads that could (and did, for these two
+  cases) silently drift out of sync with the corresponding `==` methods.
+
 ### Changed
 
 - The test suite follows the layout of the other JuliaGNI packages. `test/runtests.jl` holds one
