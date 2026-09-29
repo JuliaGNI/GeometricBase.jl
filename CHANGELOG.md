@@ -44,12 +44,18 @@ makes it worth keeping.
   `"0.16.11, 0.17"`; a second entry could only narrow it and test fewer versions than the
   package claims. A test or docs environment carries no `[compat]` entry for a dependency of
   the root `Project.toml`.
+- The docstring of `copy!(st::State, sol::NamedTuple)` names `copy!` and `sol`, not `initialize!`
+  and `ics`, and says that the keys of `sol` must be a subset of the keys of the state, as the
+  method asserts.
 
 ### Added
 
 - `test/quality/aqua.jl` runs Aqua's checks. Its ambiguity check is `broken`: `range` for a
   `StateWithError` is ambiguous with `Base.range` (issue #22). Aqua and Random are new test
   dependencies.
+- `test/quality/explicit_imports.jl` runs `ExplicitImports.test_explicit_imports`, which fails on
+  a stale explicit import and on an import through a module that does not own the name.
+  ExplicitImports 1.15 is a new test dependency.
 
 ## [0.14.12] — 2026-09-23
 

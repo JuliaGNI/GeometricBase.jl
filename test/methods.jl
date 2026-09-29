@@ -14,6 +14,6 @@ timespan(x::StepRangeLen) = x
 
 for f in (:basis, :degree, :nnodes, :nodes, :weights)
     g = getfield(GeometricBase, f)
-    @test isa(g, Function)
+    @test g isa Function
     @test length(methods(g)) == 0
 end
