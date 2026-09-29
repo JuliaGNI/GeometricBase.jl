@@ -39,6 +39,11 @@ makes it worth keeping.
 - The four test files that draw random numbers seed the RNG.
 - The tests assert `!isnan(x)` directly, not `isnan(x) == false`. The three assertions are
   stricter, as an `isnan` that returns a non-`Bool` now fails. Nothing under `src/` changes.
+- `test/Project.toml` no longer carries `HDF5 = "0.17.4"` in `[compat]`. HDF5 is a weak
+  dependency of the package, so the test environment already takes the root's bound
+  `"0.16.11, 0.17"`; a second entry could only narrow it and test fewer versions than the
+  package claims. A test or docs environment carries no `[compat]` entry for a dependency of
+  the root `Project.toml`.
 - The docstring of `copy!(st::State, sol::NamedTuple)` names `copy!` and `sol`, not `initialize!`
   and `ics`, and says that the keys of `sol` must be a subset of the keys of the state, as the
   method asserts.
