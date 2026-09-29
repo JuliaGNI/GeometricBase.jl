@@ -36,3 +36,14 @@ Defects found in review and not yet fixed.
   survives `test/data/data_and_system_types.jl`. No other test file names `GeometricData`.
 - **kind:** missing test
 - **found:** 2026-09-26
+
+### K5 · No CI job runs the suite on HDF5 0.16.11, the root floor.
+
+- **location:** `Project.toml:16`
+- **evidence:** the Downgrade log of the `main` run 36477203480 (job 109139865132) says "Package
+  HDF5 from compat not found in resolved manifest". HDF5 is a weak dependency of the root, which
+  `--min=@deps` does not force, and the test environment then takes HDF5 0.17.4. On Julia 1.13,
+  HDF5 0.16.11 does not install: HDF5_jll is restricted to 1.10.5–1.12.2 by HDF5 and to
+  1.14.3–2.2.2 by Julia.
+- **kind:** not verified
+- **found:** PR #32
