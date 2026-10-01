@@ -6,7 +6,7 @@ import GeometricBase
 # public: exported, or named in the `public` statement. The names are read from the file, so
 # that a stub added without a `public` entry fails here.
 
-const STUB = r"^function\s+(\S+)\s+end\s*$"
+const STUB = r"^\s*function\s+(\S+)\s+end\b"
 
 stubs = Symbol[]
 for line in eachline(joinpath(pkgdir(GeometricBase), "src", "methods.jl"))

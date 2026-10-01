@@ -47,3 +47,12 @@ Defects found in review and not yet fixed.
   1.14.3–2.2.2 by Julia.
 - **kind:** not verified
 - **found:** PR #32
+
+### K6 · `test/public.jl` does not fail for a `public` name with no stub.
+
+- **location:** `test/public.jl:21`
+- **evidence:** the test asserts that each stub of `src/methods.jl` is public, and nothing in the
+  other direction. A `public` entry for a stub that `src/methods.jl` no longer defines passes the
+  test. A probe of the branch found no such name.
+- **kind:** missing test
+- **found:** 2026-10-01
