@@ -14,6 +14,18 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- GeometricBase 0.15 declares its stubs public and requires Julia 1.11. Every function stub of
+  `src/methods.jl`, and `initialtime` and `finaltime`, is public. The six exported stubs stay
+  exported: `datatype`, `timetype`, `arrtype` and `equtype` from `src/methods.jl`, and `reset!`
+  and `value` from `src/data/state_variables.jl`. Every other one is public through a new
+  `public` statement. The stubs are meant to be extended by other packages, and the ecosystem
+  uses them by qualified name to avoid export clashes; `public` makes that use part of the API
+  without a new export. The `public` keyword needs Julia 1.11, so Julia 1.10 cannot load 0.15,
+  and Julia 1.10 users keep 0.14.12. The exports do not change. `test/public.jl` reads the stubs
+  from `src/methods.jl` and fails for a stub that is not public.
+
 ### Fixed
 
 - `x ≠ y` (and `x != y`) now agrees with whatever `Base.:(==)` method actually applies for `x`

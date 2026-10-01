@@ -1,6 +1,6 @@
 name = "GeometricBase"
 uuid = "9a0b12b7-583b-4f04-aa1f-d8551b6addc9"
-version = "0.14.12"
+version = "0.15.0"
 authors = ["Michael Kraus"]
 
 [deps]
@@ -15,4 +15,4 @@ GeometricBaseHDF5Ext = "HDF5"
 [compat]
 HDF5 = "0.16.11, 0.17"
 Unicode = "1.10"
-julia = "1.10"
+julia = "1.11"

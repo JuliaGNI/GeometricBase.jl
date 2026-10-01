@@ -1,6 +1,14 @@
 
 export datatype, timetype, arrtype, equtype
 
+public evaluate, evaluate!, solutionstep!, update!,
+       ntime, nsave, nstore, nsteps, nsamples, nconstraints, nnodes, noisedims,
+       eachsample, eachtimestep, timespan, timestep, timesteps,
+       initialstate, initialtime, finaltime,
+       equation, equations, functions, solutions, invariants, parameters, periodicity,
+       initialguess, noise, order, degree, coefficients, tableau, basis, nodes, weights,
+       name, description, reference, variables, h5save, h5load
+
 function datatype end
 function timetype end
 function arrtype end
