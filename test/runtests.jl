@@ -15,7 +15,7 @@ if "core" in GROUPS
     @safetestset "State Variables" include("data/state_variables.jl")
     @safetestset "States" include("data/state.jl")
     @safetestset "Methods" include("methods.jl")
-    @safetestset "Public Names" include("public.jl")
+    @safetestset "Public Names" include("integration/public.jl")
     @safetestset "HDF5 Extension" include("integration/hdf5_ext.jl")
     @safetestset "Types" include("types.jl")
     @safetestset "Utils" include("Utils.jl")

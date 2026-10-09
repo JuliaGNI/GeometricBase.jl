@@ -18,6 +18,10 @@ makes it worth keeping.
 
 - CI uploads coverage from the `Julia 1 - ubuntu-latest` job instead of `Julia min`, and a test
   job saves the Julia cache only when it succeeds.
+- `test/public.jl` moved to `test/integration/public.jl`. The test convention keeps a test file
+  at the top level of `test/` only where it mirrors `src/<name>.jl`, and there is no
+  `src/public.jl`. The file tests the public names of `src/methods.jl`, but `test/methods.jl`
+  already exists, so it moved to `test/integration/`.
 
 ## [0.15.0] — 2026-10-01
 
