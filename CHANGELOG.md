@@ -23,6 +23,14 @@ makes it worth keeping.
   `src/public.jl`. The file tests the public names of `src/methods.jl`, but `test/methods.jl`
   already exists, so it moved to `test/integration/`.
 
+### Fixed
+
+- **`State` keeps the vector field of an empty state variable.** A field was dropped where
+  `all(ismissing, x)` held, which is true of every empty array, so a state variable with a zero
+  extent lost its field and a `6 × 0` particle matrix had no `q̇` to fill — `integrate` raised
+  `FieldError` on any problem whose state is empty. A field is now dropped only where
+  `_vectorfield` returns `missing`, so a vector field mirrors the shape of its state variable.
+
 ## [0.15.0] — 2026-10-01
 
 ### Breaking Changes

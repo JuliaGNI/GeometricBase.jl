@@ -47,3 +47,18 @@ Defects found in review and not yet fixed.
   1.14.3–2.2.2 by Julia.
 - **kind:** not verified
 - **found:** PR #32
+
+### K6 · `L2norm(x, y)` raises on an empty argument, so a nonlinear solve of an empty state stops in its status.
+
+- **location:** `src/utils/norms.jl:2-5`
+- **evidence:** `L2norm(x, y)` is `mapfoldl(z -> (z[1] - z[2])^2, +, zip(x, y))`, and `mapfoldl` with
+  `+` refuses an empty collection: `L2norm(Float64[], Float64[])` gives
+  `ArgumentError: reducing over an empty collection is not allowed; consider supplying init to the
+  reducer`. The one-argument method at `:14-17` guards with `isempty(x) && return zero(T)`, so a
+  norm of an empty array is `0`; the two-argument method has no such guard. Its callers include
+  `SimpleSolvers` `src/nonlinear/nonlinear_solver_status.jl:143,145`, which `residuals(state)`
+  computes at every iteration of every nonlinear solve — the step an implicit integrator takes —
+  and GeometricOptimizers' line searches. So a solve over an empty state fails in the status, with
+  a message that names no solver and no integrator.
+- **kind:** defect
+- **found:** 2026-10-11
