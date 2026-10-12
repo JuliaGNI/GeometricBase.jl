@@ -76,9 +76,11 @@ function State(initialtime::Real, ics::NamedTuple; initialize = true)
     vectorfield = map(x -> _vectorfield(x), ics)
 
     # remove all fields that are missing, i.e., that correspond to a variable without vectorfield.
-    # `_vectorfield` returns the scalar `missing` for those, so that case is tested on its own:
-    # `all(ismissing, missing)` cannot iterate a scalar, and a broadcast here would allocate.
-    _novectorfield(x) = ismissing(x) || all(ismissing, x)
+    # A field is dropped only where `_vectorfield` returns `missing`, which it does for a time,
+    # algebraic or vector-field variable and nowhere else. A vector field mirrors the shape of its
+    # state variable, so an empty state variable keeps its field: `all(ismissing, x)` is true of
+    # every empty array, which would drop the vector field of a `6 × 0` state.
+    _novectorfield(x) = ismissing(x)
     vectorfield_filtered = NamedTuple{filter(k -> !_novectorfield(vectorfield[k]), keys(vectorfield))}(vectorfield)
 
     # create vector field symbols with dotted solution symbols

@@ -171,3 +171,21 @@ end
 
     @test isnan(st)
 end
+
+@testset "$(rpad("State of an Empty or Scalar State Variable",80))" begin
+    # A vector field mirrors the shape of its state variable, so a state variable with a zero
+    # extent keeps its field. `all(ismissing, x)` is true of every empty array, and dropping the
+    # `q̇` of a `6 × 0` state leaves it without a vector field.
+    for q in (zeros(6, 0), zeros(0), zeros(3, 0, 2), fill(1.0))
+        st = State(0.0, (q = StateVariable(q),))
+        @test :q̇ ∈ keys(st)
+        @test size(st.q̇) == size(st.q)
+    end
+
+    # a field is still dropped where `_vectorfield` returns `missing`
+    st = State(0.0, (t = TimeVariable(1.0), q = StateVariable(zeros(6, 0)),
+        λ = AlgebraicVariable(zeros(0))))
+    @test :q̇ ∈ keys(st)
+    @test :q ∈ keys(vectorfield(st))
+    @test length(vectorfield(st)) == 1
+end
