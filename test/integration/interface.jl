@@ -34,10 +34,6 @@ function shadowed_generics(mod::Module)
     shadows = Tuple{Symbol, Module}[]
     for n in names(mod; all = true)
         startswith(String(n), "#") && continue
-        # Every module is given an `eval` and an `include`. Up to Julia 1.11 `parentmodule` reports
-        # `mod` for both, from 1.12 `Core` and `Base`; they are generated rather than declared here
-        # either way, so skipping them keeps the scan the same on every supported version.
-        n in (:eval, :include) && continue
         isdefined(mod, n) || continue
         f = getglobal(mod, n)
         (f isa Function && parentmodule(f) === mod) || continue
