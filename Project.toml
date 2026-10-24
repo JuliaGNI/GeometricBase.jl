@@ -15,4 +15,4 @@ GeometricBaseHDF5Ext = "HDF5"
 [compat]
 HDF5 = "0.16.11, 0.17"
 Unicode = "1.10"
-julia = "1.11"
+julia = "1.12"
