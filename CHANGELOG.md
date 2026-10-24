@@ -12,12 +12,12 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
-## [Unreleased] — targeting 0.16.0
+## [0.15.2] — 2026-10-24
 
 ### Changed
 
-- **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A breaking change under
-  this package's pre-1.0 convention: a caller on Julia 1.11 can no longer install this version.
+- **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A patch release, because no
+  API changes: a caller on Julia 1.11 can no longer install this version.
   The scan in `test/integration/interface.jl` no longer skips the generated `eval` and `include`:
   from Julia 1.12 `parentmodule` attributes them to `Core` and `Base`, so the scan's
   `parentmodule(f) === mod` test already excludes them and `scanned` stays 87 with no
