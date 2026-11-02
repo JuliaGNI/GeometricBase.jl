@@ -12,6 +12,18 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased]
+
+### Changed
+
+- **The `HDF5` floor is 0.16.15** (`[compat] HDF5 = "0.16.15, 0.17"`, from 0.16.11). HDF5
+  0.16.11–0.16.14 accept only `HDF5_jll` 1.10 and 1.12, whose releases all cap Julia at 1.11;
+  0.16.15 is the first to accept `HDF5_jll` 1.14, which installs on Julia 1.12. The CI downgrade
+  job resolved 0.16.15 and failed its lower-bound check.
+- `test/Project.toml` gives its two test dependencies without a compat entry one:
+  `HDF5 = "0.16.15, 0.17"`, the same as the package, and `SafeTestsets = "0.0.1, 0.1"`. The test
+  suite passes at the floors, with HDF5 0.16.15 and SafeTestsets 0.0.1.
+
 ## [0.15.2] — 2026-10-24
 
 ### Changed
