@@ -16,13 +16,17 @@ makes it worth keeping.
 
 ### Changed
 
-- **The `HDF5` floor is 0.16.15** (`[compat] HDF5 = "0.16.15, 0.17"`, from 0.16.11). HDF5
-  0.16.11–0.16.14 accept only `HDF5_jll` 1.10 and 1.12, whose releases all cap Julia at 1.11;
-  0.16.15 is the first to accept `HDF5_jll` 1.14, which installs on Julia 1.12. The CI downgrade
-  job resolved 0.16.15 and failed its lower-bound check.
-- `test/Project.toml` gives its two test dependencies without a compat entry one:
-  `HDF5 = "0.16.15, 0.17"`, the same as the package, and `SafeTestsets = "0.0.1, 0.1"`. The test
-  suite passes at the floors, with HDF5 0.16.15 and SafeTestsets 0.0.1.
+- **The `HDF5` floor is 0.17** (`[compat] HDF5 = "0.17"`, from `"0.16.11, 0.17"`). HDF5
+  0.16.11–0.16.14 accept only `HDF5_jll` 1.10 and 1.12, whose releases all cap Julia at 1.11.
+  0.16.15 installs on Julia 1.12, but it finds its library through a `deps/deps.jl` that
+  `Pkg.build` writes. The CI downgrade job builds the packages before it
+  resolves the floors, so HDF5 0.16.15 stayed unbuilt there and failed to precompile with
+  ``UndefVarError: `libhdf5` not defined in `HDF5.API` ``. 0.17 has no build step: it takes its
+  library from `HDF5_jll` or from a preference. The downgrade job resolves `test/Project.toml`
+  with the package, so it now forces HDF5 to this floor and runs the suite there. Fixes K5.
+- `test/Project.toml` gives `SafeTestsets`, its one test-only dependency without a compat entry,
+  the entry `"0.0.1, 0.1"`. `HDF5` takes its bound from the package. The test suite passes at the
+  floors, with HDF5 0.17.0 and SafeTestsets 0.0.1.
 
 ## [0.15.2] — 2026-10-24
 
