@@ -28,10 +28,11 @@ makes it worth keeping.
   the entry `"0.0.1, 0.1"`. `HDF5` takes its bound from the package. The test suite passes at the
   floors, with HDF5 0.17.0 and SafeTestsets 0.0.1.
 - **A pull request that changes `src/`, `ext/` or `Project.toml` runs the `core` tests of the 23
-  direct dependents against its head** (`.github/workflows/Dependents.yml`, advisory). The list is
-  `.github/dependents.toml`, written by `harness dependents`. A red dependent runs again against
-  `main`: only a failure on the head that `main` does not have fails the job, and a head outside a
-  dependent's `[compat]` is reported as excluded.
+  direct dependents against the pull request** (`.github/workflows/Dependents.yml`, advisory). The
+  list is `.github/dependents.toml`, written by `harness dependents`. A red dependent runs again
+  against `main`: a failure that `main` does not have fails the job as a regression, a failure on
+  both is reported as known red, and a version outside a dependent's `[compat]` is reported as
+  excluded.
 
 ## [0.15.2] — 2026-10-24
 
