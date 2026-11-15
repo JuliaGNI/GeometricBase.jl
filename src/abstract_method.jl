@@ -22,9 +22,10 @@ reference(::Union{AbstractMethod, Type{<:AbstractMethod}}) = missing
 
 `true` when `method` is an `AbstractMethod` whose ten properties `isexplicit`, `isimplicit`,
 `issymmetric`, `issymplectic`, `isenergypreserving`, `isstifflyaccurate`, `order`, `name`,
-`description` and `reference` all answer other than `missing`, and `false` otherwise.
-[`interface_violations`](@ref) lists the properties that throw, answer the wrong type, are
-defined again in a module of the method, or, on request, answer `missing`.
+`description` and `reference` all answer other than `missing`, and `false` otherwise. A
+property that throws makes `isAbstractMethod` throw. [`interface_violations`](@ref) lists the
+properties that throw, answer the wrong type, are defined again in a module of the method, or,
+on request, answer `missing`.
 """
 isAbstractMethod(::Any) = false
 
@@ -73,7 +74,9 @@ The violations of the contract of `AbstractMethod` by `method`, in the form of
   `name`, `description` and `reference` have no type rule.
 - `:missing`: the property answers `missing`; reported only with `include_missing = true`.
 
-Unlike for [`isAbstractMethod`](@ref), an answer `missing` is no violation by default.
+Unlike for [`isAbstractMethod`](@ref), an answer `missing` is no violation by default. Each
+property is called on `method` only: the contract also defines `order`, `name`, `description`
+and `reference` on the type of `method`, and those answers are not checked.
 """
 function interface_violations(method::AbstractMethod; include_missing::Bool = false)
     violations = Violation[]
