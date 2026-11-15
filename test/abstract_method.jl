@@ -175,12 +175,87 @@ end
 complete!(ThrowsThenShadow.OrderMethod; except = (:isimplicit,))
 GeometricBase.isimplicit(::ThrowsThenShadow.OrderMethod) = error("no answer")
 
+# A function of the module named as a property, with no method for the method type.
+module Unrelated
+using GeometricBase
+struct Tableau end
+name(::Tableau) = "a tableau"
+struct UnrelatedMethod <: AbstractMethod end
+end
+
+complete!(Unrelated.UnrelatedMethod)
+
+# A function imported from a module off the chain, and extended for the method type.
+module Foreign
+function issymmetric end
+end
+
+module ImportsForeign
+using GeometricBase
+import ..Foreign: issymmetric
+struct ForeignMethod <: AbstractMethod end
+issymmetric(::ForeignMethod) = true
+end
+
+complete!(ImportsForeign.ForeignMethod; except = (:issymmetric,))
+
+# A function imported from a sibling submodule, and extended for the method type.
+module Sibling
+module Utils
+function order end
+end
+module Methods
+using GeometricBase
+import ..Utils: order
+struct UtilsMethod <: AbstractMethod end
+order(::UtilsMethod) = 2
+end
+end
+
+complete!(Sibling.Methods.UtilsMethod; except = (:order,))
+
+# A function of the module with a method for the type of the method type only.
+module TypeShadow
+using GeometricBase
+struct TypeMethod <: AbstractMethod end
+description(::Type{TypeMethod}) = "own"
+end
+
+complete!(TypeShadow.TypeMethod)
+
+# Answers on the type of a method.
+struct TypeOrder <: AbstractMethod end
+complete!(TypeOrder)
+GeometricBase.order(::Type{TypeOrder}) = "2s"
+
+struct TypeBoolOrder <: AbstractMethod end
+complete!(TypeBoolOrder)
+GeometricBase.order(::Type{TypeBoolOrder}) = true
+
+struct TypeThrows <: AbstractMethod end
+complete!(TypeThrows)
+GeometricBase.reference(::Type{TypeThrows}) = error("no answer")
+
+struct TypeFreeText <: AbstractMethod end
+complete!(TypeFreeText)
+GeometricBase.order(::Type{TypeFreeText}) = big(2)
+GeometricBase.name(::Type{TypeFreeText}) = :fixture
+GeometricBase.description(::Type{TypeFreeText}) = nothing
+GeometricBase.reference(::Type{TypeFreeText}) = 42
+
+struct BothWrong <: AbstractMethod end
+complete!(BothWrong; except = (:order,))
+GeometricBase.order(::BothWrong) = 2.0
+GeometricBase.order(::Type{BothWrong}) = "2s"
+
 # `Main` ends the chain of a method type defined below it, and is the module of a method type
 # defined in it. Both need a function of `Main`'s own, so they run in a fresh process, which
-# leaves `Main` of this process unchanged. The process prints one line per method type.
+# leaves `Main` of this process unchanged. A function with no method is no shadow. The process
+# prints one line per method type.
 const MAIN_CHECK = """
 using GeometricBase
 function isstifflyaccurate end
+description(x) = "own"
 struct MainMethod <: AbstractMethod end
 module Below
 using GeometricBase
@@ -273,9 +348,52 @@ end
     lines = run_main_check()
     @test length(lines) == 2
     @test lines[1] ==
-          "[(:isstifflyaccurate, :shadowed, \"module Main defines its own " *
-          "`isstifflyaccurate`, which does not extend `GeometricBase.isstifflyaccurate`\")]"
+          "[(:description, :shadowed, \"module Main defines its own " *
+          "`description`, which does not extend `GeometricBase.description`\")]"
     @test lines[2] == "Tuple{Symbol, Symbol, String}[]"
+
+    v = GeometricBase.interface_violations(TypeShadow.TypeMethod())
+    @test [(x.f, x.kind) for x in v] == [(:description, :shadowed)]
+    @test occursin("TypeShadow", v[1].detail)
+end
+
+@testset "a function with no method for the method type is no shadow" begin
+    @test !isempty(methods(getglobal(Unrelated, :name)))
+    @test isempty(GeometricBase.interface_violations(Unrelated.UnrelatedMethod()))
+end
+
+@testset "a function imported from off the chain of modules" begin
+    v = GeometricBase.interface_violations(ImportsForeign.ForeignMethod())
+    @test [(x.f, x.kind) for x in v] == [(:issymmetric, :shadowed)]
+    @test startswith(v[1].detail, "module $(Foreign) defines its own `issymmetric`")
+
+    w = GeometricBase.interface_violations(Sibling.Methods.UtilsMethod(); include_missing = true)
+    @test [(x.f, x.kind) for x in w] == [(:order, :shadowed), (:order, :missing)]
+    @test startswith(w[1].detail, "module $(Sibling.Utils) defines its own `order`")
+end
+
+@testset "the answers on the type of the method" begin
+    v = GeometricBase.interface_violations(TypeOrder())
+    @test [(x.f, x.kind) for x in v] == [(:order, :type)]
+    @test occursin("String", v[1].detail)
+    @test occursin("on the type", v[1].detail)
+
+    v = GeometricBase.interface_violations(TypeBoolOrder())
+    @test [(x.f, x.kind) for x in v] == [(:order, :type)]
+    @test occursin("Bool", v[1].detail)
+
+    v = GeometricBase.interface_violations(TypeThrows())
+    @test [(x.f, x.kind) for x in v] == [(:reference, :throws)]
+    @test occursin("ErrorException", v[1].detail)
+    @test occursin("on the type", v[1].detail)
+
+    @test isempty(GeometricBase.interface_violations(TypeFreeText()))
+
+    # The entry of the instance comes before the entry of the type.
+    v = GeometricBase.interface_violations(BothWrong())
+    @test [(x.f, x.kind) for x in v] == [(:order, :type), (:order, :type)]
+    @test occursin("Float64", v[1].detail) && !occursin("on the type", v[1].detail)
+    @test occursin("String", v[2].detail) && occursin("on the type", v[2].detail)
 end
 
 @testset "the order of the entries" begin
@@ -307,6 +425,7 @@ end
     @test getglobal(NoShadow, :issymplectic) === GeometricBase.issymplectic
     @test getglobal(NoShadow, :order) === 3
     @test getglobal(NoShadow, :name) === ExportsName.name
+    @test hasmethod(ExportsName.name, Tuple{NoShadow.NoShadowMethod})
     @test !isdefined(NoShadow, :description)
     @test isempty(GeometricBase.interface_violations(NoShadow.NoShadowMethod()))
     @test isempty(GeometricBase.interface_violations(NoSolver()))

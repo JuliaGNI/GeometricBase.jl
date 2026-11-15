@@ -20,13 +20,20 @@ makes it worth keeping.
   type.** It is public, not exported, and has a method for `AbstractMethod`. For each of the ten
   properties of a method, it reports a call that throws, an answer of the wrong type (an `is…`
   property that is not a `Bool`, an `order` that is not an `Integer` or is a `Bool`), and a
-  property that the method's module, or one of its parents, defines again as a function of its
-  own, which does not extend GeometricBase's. An answer `missing` is reported only with
-  `include_missing = true`. An implementing package tests its methods with
-  `@test isempty(GeometricBase.interface_violations(m))`; a method for a subtype calls this one
-  through `invoke` and appends its own entries. There is no method for `Any`, so a value without
-  a contract raises a `MethodError`. `isAbstractMethod` answers as before, and its new docstring
-  names `interface_violations`.
+  property that a module of the method (the module of its type and its parents) binds, by a
+  definition or an `import`, to a `Function` that is not GeometricBase's and that has a method
+  applicable to the method or to its type, so that a definition there does not extend
+  GeometricBase's. A binding brought in by `using` is not read, and a function with no such
+  method is no shadow. A function imported from another module is reported: after
+  `import LinearAlgebra: issymmetric`, the definition `issymmetric(::M) = true` is a shadow.
+  `order`, `name`, `description` and `reference` are also called on the type of the method. A
+  call that throws there, and an `order` answer on the type that is not an `Integer` or is a
+  `Bool`, are reported; an answer `missing` on the type never is. An answer `missing` on the
+  method is reported only with `include_missing = true`. An implementing package tests its
+  methods with `@test isempty(GeometricBase.interface_violations(m))`; a method for a subtype
+  calls this one through `invoke` and appends its own entries. There is no method for `Any`, so a
+  value without a contract raises a `MethodError`. `isAbstractMethod` answers as before, and its
+  new docstring names `interface_violations`.
 
 ### Changed
 

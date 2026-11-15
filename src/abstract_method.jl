@@ -49,6 +49,8 @@ const METHOD_PROPERTIES = (isexplicit, isimplicit, issymmetric, issymplectic,
 const BOOL_PROPERTIES = (isexplicit, isimplicit, issymmetric, issymplectic,
     isenergypreserving, isstifflyaccurate)
 
+const TYPE_PROPERTIES = (order, name, description, reference)
+
 const Violation = @NamedTuple{f::Symbol, kind::Symbol, detail::String}
 
 """
@@ -57,34 +59,40 @@ const Violation = @NamedTuple{f::Symbol, kind::Symbol, detail::String}
 The violations of the contract of `AbstractMethod` by `method`, in the form of
 [`interface_violations`](@ref), for its ten properties, in the order `isexplicit`, `isimplicit`,
 `issymmetric`, `issymplectic`, `isenergypreserving`, `isstifflyaccurate`, `order`, `name`,
-`description` and `reference`. Each property gives at most one entry of each kind:
+`description` and `reference`. Each property gives at most one `:shadowed` entry, and each call
+of a property at most one entry of the other kinds:
 
-- `:shadowed`: a module of the method binds the name of the property to a `Function` of its own
-  that does not extend GeometricBase's, so a definition there does not reach GeometricBase's
-  property. The modules of the method are the module of its type and each of its parents, up to
-  the first module that is its own parent, such as the root module of a package, and never
-  `Main`, `Base` or `Core`, unless the type is defined there. A function owned by another
-  module, such as one that `using` brings in, is not a shadow, and a module off this chain, such
-  as a sibling submodule, is not read. `detail` names the module that owns the function, which
-  can be a parent of the module that binds it. This entry comes before the entry of the call.
-- `:throws`: the call of the property on `method` throws; `detail` names the exception's type.
-  An `InterruptException` is thrown again.
+- `:shadowed`: a module of the method binds the name of the property to a `Function` that is not
+  GeometricBase's and has a method applicable to `method` or to its type, so a definition there
+  does not reach GeometricBase's property. The binding is a definition in the module or an
+  `import`; a binding that `using` brings in is not read, and a function with no such method is
+  not a shadow. The modules of the method are the module of its type and each of its parents, up
+  to the first module that is its own parent, such as the root module of a package, and never
+  `Main`, `Base` or `Core`, unless the type is defined there. A module off this chain, such as a
+  sibling submodule, is not read. `detail` names the module that owns the function, which can
+  be a module off the chain. This entry comes before the entries of the calls.
+- `:throws`: the call of the property throws; `detail` names the exception's type. An
+  `InterruptException` is thrown again.
 - `:type`: a property `is…` answers other than a `Bool` or `missing`, or `order` answers other
   than an `Integer` that is not a `Bool`, or `missing`; `detail` names the type of the answer.
   `name`, `description` and `reference` have no type rule.
-- `:missing`: the property answers `missing`; reported only with `include_missing = true`.
+- `:missing`: the property answers `missing` on `method`; reported only with
+  `include_missing = true`.
 
-Unlike for [`isAbstractMethod`](@ref), an answer `missing` is no violation by default. Each
-property is called on `method` only: the contract also defines `order`, `name`, `description`
-and `reference` on the type of `method`, and those answers are not checked.
+Each property is called on `method`. `order`, `name`, `description` and `reference` are also
+called on the type of `method`, and give the entries `:throws` and `:type` by the same rules;
+their `detail` ends in "on the type", and they come after the entries of the call on `method`.
+An answer `missing` on the type is no violation. Unlike for [`isAbstractMethod`](@ref), an
+answer `missing` on `method` is no violation by default.
 """
 function interface_violations(method::AbstractMethod; include_missing::Bool = false)
     violations = Violation[]
-    modules = method_modules(typeof(method))
+    T = typeof(method)
+    modules = method_modules(T)
     for f in METHOD_PROPERTIES
         fname = nameof(f)
         for m in modules
-            owner = shadow_owner(m, fname, f, modules)
+            owner = shadow_owner(m, fname, f, T)
             if owner !== nothing
                 detail = "module $owner defines its own `$fname`, " *
                          "which does not extend `GeometricBase.$fname`"
@@ -92,21 +100,30 @@ function interface_violations(method::AbstractMethod; include_missing::Bool = fa
                 break
             end
         end
-        answer = try
-            f(method)
-        catch e
-            e isa InterruptException && rethrow()
-            push!(violations, (; f = fname, kind = :throws, detail = "throws $(typeof(e))"))
-            continue
-        end
-        if answer === missing
-            include_missing &&
-                push!(violations, (;
-                    f = fname, kind = :missing, detail = "answers `missing`"))
-        elseif !answer_has_type(f, answer)
-            push!(violations, (; f = fname, kind = :type,
-                detail = "answers a value of type $(typeof(answer))"))
-        end
+        check_answer!(violations, f, method, "", include_missing)
+        f in TYPE_PROPERTIES && check_answer!(violations, f, T, " on the type", false)
+    end
+    return violations
+end
+
+# Calls `f(x)` and pushes the entry of its answer, if any, with `suffix` appended to `detail`.
+function check_answer!(violations, f, x, suffix, include_missing)
+    fname = nameof(f)
+    answer = try
+        f(x)
+    catch e
+        e isa InterruptException && rethrow()
+        push!(violations, (;
+            f = fname, kind = :throws, detail = "throws $(typeof(e))$suffix"))
+        return violations
+    end
+    if answer === missing
+        include_missing &&
+            push!(violations, (; f = fname, kind = :missing, detail = "answers `missing`"))
+    elseif !answer_has_type(f, answer)
+        push!(violations,
+            (; f = fname, kind = :type,
+                detail = "answers a value of type $(typeof(answer))$suffix"))
     end
     return violations
 end
@@ -129,12 +146,14 @@ function method_modules(T::Type)
     return modules
 end
 
-# The module that owns the function that `m` binds to `fname`, where that function is not `f`
-# and its owner is one of `modules`; `nothing` otherwise.
-function shadow_owner(m::Module, fname::Symbol, f, modules)
+# The module that owns the function that `m` binds to `fname` by a definition or an `import`,
+# where that function is not `f` and has a method for `T` or for `Type{T}`; `nothing` otherwise.
+# `names(m; imported = true)` holds the names that `m` defines or imports, not those of `using`.
+function shadow_owner(m::Module, fname::Symbol, f, T::Type)
     isdefined(m, fname) || return nothing
     g = getglobal(m, fname)
     (g isa Function && g !== f) || return nothing
-    owner = parentmodule(g)
-    return owner in modules ? owner : nothing
+    (hasmethod(g, Tuple{T}) || hasmethod(g, Tuple{Type{T}})) || return nothing
+    fname in names(m; all = true, imported = true) || return nothing
+    return parentmodule(g)
 end
