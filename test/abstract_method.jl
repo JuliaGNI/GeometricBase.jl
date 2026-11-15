@@ -152,15 +152,61 @@ end
 
 complete!(NoShadow.NoShadowMethod)
 
-# `Main` ends the chain of a method type defined below it, and is the module of a method type
-# defined in it. `Main` binds its own `isstifflyaccurate` before any testset runs, so the
-# parent-module testset sees that `Main` is not part of the chain of `Outer.Sub.SubMethod`.
-# Each include names the type anew, so a second include in one process defines no type again.
-const MainMethod = let T = gensym(:InterfaceViolationsMainMethod)
-    Core.eval(Main, :(function isstifflyaccurate end; struct $T <: $AbstractMethod end; $T))
+# A parent module that defines its own `name`, and a submodule that binds it by `using`.
+module Par
+using GeometricBase
+name(x) = 1
+module Kid
+using GeometricBase
+using ..Par: name
+struct KidMethod <: AbstractMethod end
+end
 end
 
-complete!(MainMethod)
+complete!(Par.Kid.KidMethod; except = (:name,))
+
+# A property that throws before a property that is defined again.
+module ThrowsThenShadow
+using GeometricBase
+description(x) = "own"
+struct OrderMethod <: AbstractMethod end
+end
+
+complete!(ThrowsThenShadow.OrderMethod; except = (:isimplicit,))
+GeometricBase.isimplicit(::ThrowsThenShadow.OrderMethod) = error("no answer")
+
+# `Main` ends the chain of a method type defined below it, and is the module of a method type
+# defined in it. Both need a function of `Main`'s own, so they run in a fresh process, which
+# leaves `Main` of this process unchanged. The process prints one line per method type.
+const MAIN_CHECK = """
+using GeometricBase
+function isstifflyaccurate end
+struct MainMethod <: AbstractMethod end
+module Below
+using GeometricBase
+struct BelowMethod <: AbstractMethod end
+end
+for T in (MainMethod, Below.BelowMethod)
+    @eval GeometricBase.isexplicit(::\$T) = true
+    @eval GeometricBase.isimplicit(::\$T) = false
+    @eval GeometricBase.issymmetric(::\$T) = true
+    @eval GeometricBase.issymplectic(::\$T) = false
+    @eval GeometricBase.isenergypreserving(::\$T) = true
+    @eval GeometricBase.isstifflyaccurate(::\$T) = false
+    @eval GeometricBase.order(::\$T) = 3
+    @eval GeometricBase.name(::\$T) = "Fixture"
+    @eval GeometricBase.description(::\$T) = "A fixture"
+    @eval GeometricBase.reference(::\$T) = "none"
+end
+for T in (MainMethod, Below.BelowMethod)
+    println(repr([(x.f, x.kind, x.detail) for x in GeometricBase.interface_violations(T())]))
+end
+"""
+
+function run_main_check()
+    cmd = `$(Base.julia_cmd()) --startup-file=no --project=$(Base.active_project()) -e $MAIN_CHECK`
+    return split(readchomp(cmd), '\n')
+end
 
 @testset "no method for a value without a contract" begin
     @test Base.ispublic(GeometricBase, :interface_violations)
@@ -224,9 +270,24 @@ end
     @test [(x.f, x.kind) for x in w] ==
           [(:issymplectic, :shadowed), (:issymplectic, :missing)]
 
-    m = GeometricBase.interface_violations(MainMethod())
-    @test [(x.f, x.kind) for x in m] == [(:isstifflyaccurate, :shadowed)]
-    @test occursin("Main", m[1].detail)
+    lines = run_main_check()
+    @test length(lines) == 2
+    @test lines[1] ==
+          "[(:isstifflyaccurate, :shadowed, \"module Main defines its own " *
+          "`isstifflyaccurate`, which does not extend `GeometricBase.isstifflyaccurate`\")]"
+    @test lines[2] == "Tuple{Symbol, Symbol, String}[]"
+end
+
+@testset "the order of the entries" begin
+    v = GeometricBase.interface_violations(ThrowsThenShadow.OrderMethod())
+    @test [(x.f, x.kind) for x in v] == [(:isimplicit, :throws), (:description, :shadowed)]
+end
+
+@testset "the module that owns a shadow" begin
+    v = GeometricBase.interface_violations(Par.Kid.KidMethod(); include_missing = true)
+    @test [(x.f, x.kind) for x in v] == [(:name, :shadowed), (:name, :missing)]
+    @test startswith(v[1].detail, "module $(Par) defines its own `name`")
+    @test !occursin("Kid", v[1].detail)
 end
 
 @testset "a property defined again in a parent module" begin

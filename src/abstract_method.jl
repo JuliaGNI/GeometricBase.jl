@@ -64,7 +64,8 @@ The violations of the contract of `AbstractMethod` by `method`, in the form of
   the first module that is its own parent, such as the root module of a package, and never
   `Main`, `Base` or `Core`, unless the type is defined there. A function owned by another
   module, such as one that `using` brings in, is not a shadow, and a module off this chain, such
-  as a sibling submodule, is not read. This entry comes before the entry of the call.
+  as a sibling submodule, is not read. `detail` names the module that owns the function, which
+  can be a parent of the module that binds it. This entry comes before the entry of the call.
 - `:throws`: the call of the property on `method` throws; `detail` names the exception's type.
   An `InterruptException` is thrown again.
 - `:type`: a property `is…` answers other than a `Bool` or `missing`, or `order` answers other
@@ -80,8 +81,9 @@ function interface_violations(method::AbstractMethod; include_missing::Bool = fa
     for f in METHOD_PROPERTIES
         fname = nameof(f)
         for m in modules
-            if shadows(m, fname, f, modules)
-                detail = "module $m defines its own `$fname`, " *
+            owner = shadow_owner(m, fname, f, modules)
+            if owner !== nothing
+                detail = "module $owner defines its own `$fname`, " *
                          "which does not extend `GeometricBase.$fname`"
                 push!(violations, (; f = fname, kind = :shadowed, detail))
                 break
@@ -124,9 +126,12 @@ function method_modules(T::Type)
     return modules
 end
 
-# `m` binds `fname` to a function that is not `f` and that one of `modules` owns.
-function shadows(m::Module, fname::Symbol, f, modules)
-    isdefined(m, fname) || return false
+# The module that owns the function that `m` binds to `fname`, where that function is not `f`
+# and its owner is one of `modules`; `nothing` otherwise.
+function shadow_owner(m::Module, fname::Symbol, f, modules)
+    isdefined(m, fname) || return nothing
     g = getglobal(m, fname)
-    return g isa Function && g !== f && parentmodule(g) in modules
+    (g isa Function && g !== f) || return nothing
+    owner = parentmodule(g)
+    return owner in modules ? owner : nothing
 end
