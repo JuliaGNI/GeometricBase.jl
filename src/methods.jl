@@ -7,7 +7,8 @@ public evaluate, evaluate!, solutionstep!, update!,
        initialstate, initialtime, finaltime,
        equation, equations, functions, solutions, invariants, parameters, periodicity,
        initialguess, noise, order, degree, coefficients, tableau, basis, nodes, weights,
-       name, description, reference, variables, h5save, h5load
+       name, description, reference, variables, h5save, h5load,
+       interface_violations
 
 function datatype end
 function timetype end
@@ -90,6 +91,25 @@ function reference end
 
 function value end
 function variables end
+
+"""
+    interface_violations(x; include_missing = false)
+
+The ways in which `x` breaks the contract of its abstract type, as a `Vector` of `NamedTuple`s
+`(; f::Symbol, kind::Symbol, detail::String)`: `f` names the function of the contract, `kind`
+the class of the violation, and `detail` what was found. An `x` that meets its contract gives an
+empty `Vector`, so an implementing package tests a value with
+`@test isempty(GeometricBase.interface_violations(x))`.
+
+The method for `AbstractMethod` reports the kinds `:throws`, `:type`, `:shadowed` and `:missing`,
+the last only with `include_missing = true`. A method for a subtype may add kinds of its own, and
+names them in its docstring.
+
+Each abstract type with a contract has a method. A method for a subtype calls the method of its
+supertype through `invoke` and appends its own entries. There is no method for `Any`, so a value
+without a contract raises a `MethodError`.
+"""
+function interface_violations end
 
 """
     h5save(h5, x; path)

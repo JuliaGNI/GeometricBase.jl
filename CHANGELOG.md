@@ -14,6 +14,20 @@ makes it worth keeping.
 
 ## [Unreleased]
 
+### Added
+
+- **`GeometricBase.interface_violations` lists how a value breaks the contract of its abstract
+  type.** It is public, not exported, and has a method for `AbstractMethod`. For each of the ten
+  properties of a method, it reports a call that throws, an answer of the wrong type (an `is…`
+  property that is not a `Bool`, an `order` that is not an `Integer` or is a `Bool`), and a
+  property that the method's module, or one of its parents, defines again as a function of its
+  own, which does not extend GeometricBase's. An answer `missing` is reported only with
+  `include_missing = true`. An implementing package tests its methods with
+  `@test isempty(GeometricBase.interface_violations(m))`; a method for a subtype calls this one
+  through `invoke` and appends its own entries. There is no method for `Any`, so a value without
+  a contract raises a `MethodError`. `isAbstractMethod` answers as before, and its new docstring
+  names `interface_violations`.
+
 ### Changed
 
 - **A cancelled step of `Dependents.yml` gives an inconclusive row.** When a step of a dependent
