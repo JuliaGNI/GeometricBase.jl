@@ -105,9 +105,8 @@ The method for `AbstractMethod` reports the kinds `:throws`, `:type`, `:shadowed
 the last only with `include_missing = true`. A method for a subtype may add kinds of its own, and
 names them in its docstring.
 
-Each abstract type with a contract has a method. A method for a subtype calls the method of its
-supertype through `invoke` and appends its own entries. There is no method for `Any`, so a value
-without a contract raises a `MethodError`.
+A method for a subtype calls the method of its supertype through `invoke` and appends its own
+entries. There is no method for `Any`, so a value without a contract raises a `MethodError`.
 """
 function interface_violations end
 
