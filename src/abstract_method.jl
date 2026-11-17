@@ -74,16 +74,19 @@ of a property at most one entry of the other kinds:
 - `:throws`: the call of the property throws; `detail` names the exception's type. An
   `InterruptException` is thrown again.
 - `:type`: a property `is…` answers other than a `Bool` or `missing`, or `order` answers other
-  than an `Integer` that is not a `Bool`, or `missing`; `detail` names the type of the answer.
-  `name`, `description` and `reference` have no type rule.
+  than an `Integer` that is not a `Bool`, or `missing`; on the type of `method`, `order` may also
+  answer an `AbstractString`, such as the formula `"2s"` in the number of stages `s`, but on
+  `method` a string is a violation. `detail` names the type of the answer. `name`, `description`
+  and `reference` have no type rule.
 - `:missing`: the property answers `missing` on `method`; reported only with
   `include_missing = true`.
 
 Each property is called on `method`. `order`, `name`, `description` and `reference` are also
-called on the type of `method`, and give the entries `:throws` and `:type` by the same rules;
-their `detail` ends in "on the type", and they come after the entries of the call on `method`.
-An answer `missing` on the type is no violation. Unlike for [`isAbstractMethod`](@ref), an
-answer `missing` on `method` is no violation by default.
+called on the type of `method`, and give the entries `:throws` and `:type` by the same rules,
+except that `order` may answer an `AbstractString` there; their `detail` ends in "on the type",
+and they come after the entries of the call on `method`. An answer `missing` on the type is no
+violation. Unlike for [`isAbstractMethod`](@ref), an answer `missing` on `method` is no
+violation by default.
 """
 function interface_violations(method::AbstractMethod; include_missing::Bool = false)
     violations = Violation[]
@@ -120,7 +123,7 @@ function check_answer!(violations, f, x, suffix, include_missing)
     if answer === missing
         include_missing &&
             push!(violations, (; f = fname, kind = :missing, detail = "answers `missing`"))
-    elseif !answer_has_type(f, answer)
+    elseif !answer_has_type(f, answer, x isa Type)
         push!(violations,
             (; f = fname, kind = :type,
                 detail = "answers a value of type $(typeof(answer))$suffix"))
@@ -128,9 +131,14 @@ function check_answer!(violations, f, x, suffix, include_missing)
     return violations
 end
 
-function answer_has_type(f, answer)
-    f in BOOL_PROPERTIES ? answer isa Bool :
-    f === order ? answer isa Integer && !(answer isa Bool) : true
+# Whether `answer` has the type that the rule of `f` asks for. `on_type` is `true` for the call
+# on the type of a method, where `order` may answer a formula, such as "2s" in the number of
+# stages `s`, as an `AbstractString`.
+function answer_has_type(f, answer, on_type::Bool)
+    f in BOOL_PROPERTIES && return answer isa Bool
+    f === order || return true
+    on_type && answer isa AbstractString && return true
+    return answer isa Integer && !(answer isa Bool)
 end
 
 # The module of a method type and its parents, up to the first module that is its own parent.
