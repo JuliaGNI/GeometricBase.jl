@@ -243,10 +243,39 @@ GeometricBase.name(::Type{TypeFreeText}) = :fixture
 GeometricBase.description(::Type{TypeFreeText}) = nothing
 GeometricBase.reference(::Type{TypeFreeText}) = 42
 
+struct TypeFloatOrder <: AbstractMethod end
+complete!(TypeFloatOrder)
+GeometricBase.order(::Type{TypeFloatOrder}) = 2.0
+
+struct TypeSymbolOrder <: AbstractMethod end
+complete!(TypeSymbolOrder)
+GeometricBase.order(::Type{TypeSymbolOrder}) = :s2
+
 struct BothWrong <: AbstractMethod end
 complete!(BothWrong; except = (:order,))
 GeometricBase.order(::BothWrong) = 2.0
-GeometricBase.order(::Type{BothWrong}) = "2s"
+GeometricBase.order(::Type{BothWrong}) = 2.0
+
+# A formula in the number of stages as the order: on the type, as a `String` and as a
+# `SubString`, and on an instance.
+struct FormulaOrder <: AbstractMethod end
+complete!(FormulaOrder; except = (:order,))
+GeometricBase.order(::FormulaOrder) = 2
+GeometricBase.order(::Type{FormulaOrder}) = "2s"
+
+struct SubStringOrder <: AbstractMethod end
+complete!(SubStringOrder; except = (:order,))
+GeometricBase.order(::SubStringOrder) = 3
+GeometricBase.order(::Type{SubStringOrder}) = SubString("2s-1 stages", 1, 4)
+
+struct InstanceFormula <: AbstractMethod end
+complete!(InstanceFormula; except = (:order,))
+GeometricBase.order(::InstanceFormula) = "2s"
+
+# An order that is missing on the instance and on the type.
+struct MissingOrder <: AbstractMethod end
+complete!(MissingOrder; except = (:order,))
+GeometricBase.order(::Union{MissingOrder, Type{MissingOrder}}) = missing
 
 # `Main` ends the chain of a method type defined below it, and is the module of a method type
 # defined in it. Both need a function of `Main`'s own, so they run in a fresh process, which
@@ -373,27 +402,54 @@ end
 end
 
 @testset "the answers on the type of the method" begin
-    v = GeometricBase.interface_violations(TypeOrder())
-    @test [(x.f, x.kind) for x in v] == [(:order, :type)]
-    @test occursin("String", v[1].detail)
-    @test occursin("on the type", v[1].detail)
+    @test isempty(GeometricBase.interface_violations(TypeOrder()))
 
-    v = GeometricBase.interface_violations(TypeBoolOrder())
-    @test [(x.f, x.kind) for x in v] == [(:order, :type)]
-    @test occursin("Bool", v[1].detail)
+    wrong = [TypeBoolOrder => "Bool", TypeFloatOrder => "Float64",
+        TypeSymbolOrder => "Symbol"]
+    for (T, typename) in wrong
+        v = GeometricBase.interface_violations(T())
+        @test [(x.f, x.kind) for x in v] == [(:order, :type)]
+        @test occursin(typename, v[1].detail)
+        @test endswith(v[1].detail, "on the type")
+    end
 
     v = GeometricBase.interface_violations(TypeThrows())
     @test [(x.f, x.kind) for x in v] == [(:reference, :throws)]
     @test occursin("ErrorException", v[1].detail)
-    @test occursin("on the type", v[1].detail)
+    @test endswith(v[1].detail, "on the type")
 
     @test isempty(GeometricBase.interface_violations(TypeFreeText()))
 
     # The entry of the instance comes before the entry of the type.
     v = GeometricBase.interface_violations(BothWrong())
     @test [(x.f, x.kind) for x in v] == [(:order, :type), (:order, :type)]
-    @test occursin("Float64", v[1].detail) && !occursin("on the type", v[1].detail)
-    @test occursin("String", v[2].detail) && occursin("on the type", v[2].detail)
+    @test occursin("Float64", v[1].detail) && !endswith(v[1].detail, "on the type")
+    @test occursin("Float64", v[2].detail) && endswith(v[2].detail, "on the type")
+end
+
+@testset "a formula as the order of the type" begin
+    for T in (FormulaOrder, SubStringOrder)
+        @test GeometricBase.order(T) isa AbstractString
+        @test isempty(GeometricBase.interface_violations(T()))
+        @test isempty(GeometricBase.interface_violations(T(); include_missing = true))
+    end
+    @test !(GeometricBase.order(SubStringOrder) isa String)
+end
+
+@testset "a formula as the order of an instance" begin
+    v = GeometricBase.interface_violations(InstanceFormula())
+    @test [(x.f, x.kind) for x in v] == [(:order, :type)]
+    @test occursin("String", v[1].detail)
+    @test !endswith(v[1].detail, "on the type")
+end
+
+@testset "an order that is missing" begin
+    @test GeometricBase.order(MissingOrder()) === missing
+    @test GeometricBase.order(MissingOrder) === missing
+    @test isempty(GeometricBase.interface_violations(MissingOrder()))
+    v = GeometricBase.interface_violations(MissingOrder(); include_missing = true)
+    @test [(x.f, x.kind) for x in v] == [(:order, :missing)]
+    @test !endswith(v[1].detail, "on the type")
 end
 
 @testset "the order of the entries" begin

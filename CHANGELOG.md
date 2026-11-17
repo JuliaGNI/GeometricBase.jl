@@ -12,6 +12,17 @@ here: the record of that history is `git log` and the tags. It is named as a gap
 reconstructed, because a changelog assembled after the fact loses exactly the reasoning that
 makes it worth keeping.
 
+## [Unreleased]
+
+### Changed
+
+- **`interface_violations` accepts a string from `order` on the type of a method.** A method
+  type whose order depends on its number of stages answers a formula such as `"2s"` from
+  `order(::Type)`, as 51 method types of GeometricIntegrators do. On the type, `order` may now
+  answer an `Integer` that is not a `Bool`, an `AbstractString` or `missing`; on an instance, it
+  may still answer only an `Integer` that is not a `Bool`, or `missing`, and a string there is a
+  `:type` violation. The content of the string is not checked.
+
 ## [0.15.4] — 2026-11-16
 
 ### Added
